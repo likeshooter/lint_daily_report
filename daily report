@@ -1,29 +1,36 @@
-lcx 
+zky
+今日分析rule数：2（1doing）
+今日分析msg数：363
+今日发现issue数：2
+日报：
+DTS2025102504803：实例化的output端口bus过多时，elint只能报在实例化第一行，A可以报在具体行
+DTS2025102521474：violation所在module被不同的module实例化多层次，elint和A tool在选择instance时有差异，小case暂未复现
+今日最费时问题：复现由Hierarchy不同导致的对象不匹配，感觉这种类型在大case发生比较频繁，情况比较复杂，复现比较困难，影响case量比较大
+
+mj
 今日分析rule数：2
-今日分析msg数：678
+今日分析msg数：19
 今日发现issue数：3
 日报：
-   1,发lint项目每天的日报；
-   2,和春豪一起统计今日分析数据；
-   3，分析完成泛化2条rule(E0246,E0324)
-   DTS2025102514087:跑大 case E0246一条rule都没报（全是漏报），是包没有封装这条rule导致的吗
-   DTS2025102509016:load_session 打开之后单独在check_lint -filter {@enno_id=="E0324"}，原本报了这条rule,但是这样操作之后报的为空（我认为执行这样的操作之后为空不合理
-   DTS2025102502787: 同一个模块例化多次，一个参数（改变），一个不例化参数，这个不例化参数的模块好像也受到了影响；
-今日最费时问题：无 
+   具体事项：分析E0299/E0305,发现3个dts
+   DTS描述:DTS2025102519077
+           DTS2025102442024
+今日最费时问题：定位package相关问题，
 
 
-门禁(598)：
-177条rule(当时按照177进行分析):
-  需要分析rule：59
-  已分析rule:59(pass 28,fail 31)
-  DTS:49
-泛化（4case）：
-Hi1813-FE_TSS(还未分析)
-Hi813-NFIPHYG_TOP(还未分析)
-LIGHTV300-AO_SUB（还未分析）
-Hi813XXE-TOP_LGC（后面跑出来的数据存在疑问，暂时按照177进行统计的）
-需分析rule：78
-需分析msg:17921
-已分析rule:26 (pass 10,fail 16)
-已分析msg:3180 (diff:1918 bug:1262)
-DTS:30
+jr
+今日分析rule数：1
+今日分析msg数：308
+今日发现issue数：1
+日报：
+   1.分析rule E0092，共308条误报，其中86条是issue DTS2025102521823，222条是综合差异
+   DTS2025102521823：ELINT报了E0092：out，但A工具未报，A工具因为综合不出pmos，所以综合出来的是blackbox，和ELINT有综合差异，但是rtl和原理图中都没有三态值Z，所以根据doc来看ELINT不应该报E0092，已复现case
+今日最费时问题：无
+
+lrf
+今日分析rule数：
+今日分析msg数：
+今日发现issue数：
+日报：
+1.Hi18XXE/TOP_LGC/lint E0085 复现的小case会导致工具异常退出，已提issue - DTS2025102522054
+2.今日最费时问题：无
