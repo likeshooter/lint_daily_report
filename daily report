@@ -1,168 +1,147 @@
 lcx
+今日分析rule数：4
+今日分析msg数：78
+今日发现issue数：5
 日报：
    1，发lint项目每天的日报；
    2，和春豪一起统计今日分析数据；
-   3，为CA的人在分析过程中遇到的问题；
-   4，和鑫冰沟通位宽脚本如何处理对象不匹配还有行号不匹配的msg；
-今日最费时问题：（什么事情，具体原因，有无建议）
+   3，分析完门禁的E0281,E0294,E0297,HDL_1098;
+   DTS2025103154082:for语句里面报了比较运算符两边位宽不一致；
+   DTS2025103152688：函数传常值不能正确识别位宽大小；
+   DTS2025103138649：端口列表里面只写端口信号，下面声明输入输出，这种不应该报重复定义；
+   DTS2025103133938：for语句里面的片选循环变量，这种应该是一位位宽的；
+  DTS2025103121013：动态数组new(3)的位宽应该是多少位,需要RD和PE确认；
+今日最费时问题：已汇报
 
 
-zky
-今日分析rule数：2
-今日分析msg数：25
-今日发现issue数：3
+zky:
+今日分析rule数：11
+今日分析msg数：322
+今日发现issue数：6
 日报：
-DTS2025103037552（enhence）：工具点击rtl界面的object应该在Design tree中跳转到对应的instance
-DTS2025103048032（E0239）：异步复位用作非异步复位，在不同的实例被用到，elint漏报，且两者报的异步reset信号在msg行里找不到。和spec的示例不太一样
-DTS2025103056185（E0033）：同一个input信号通过两个instance连接，elint报两次，A只报一次
-统计门禁DTS单的状态数据，反馈给RD
-回归门禁DTS单：closed：8
-今日最费时问题：（什么事情，具体原因，有无建议）
+分析门禁case：
+DTS2025103120214：当index使用1'b?时，elint误报E0149，根据spec，该rule只报x，z
+DTS2025103123694：check_lint -filter {@enno_id == “E0253”} 统计出两条rule（谢天说HDL相关的会出现这种现象，是正常的）
+DTS2025103133879：ff有异步复位没有异步置位信号（未出现在敏感列表内的信号不应该是置位/复位信号），elint误报E0253
+DTS2025103144615：check_lint -filter {@enno_id== “HDL_1273” 过滤rule错误}，应该对应HieRefNotSynth这条rule，显示NetExtConnDisallowed这条rule
+DTS2025103144696：代码中出现变量使用层次化引用，elint漏报HDL_1273
+DTS2025103152010：位宽报的和算法不一致，本身匹配的，算错导致误报
+DTS2025103154437：clock被门控，elint漏报
+今日最费时问题：已汇报
 
 
 mj
-今日分析rule数：5
-今日分析msg数：201
-今日发现issue数：3
+今日分析rule数：8
+今日分析msg数：328
+今日发现issue数：9
 日报：
-   具体事项：
-      1，分析NFI_PHYG_TOP,E0220/E0299/E0305确认和之前分析原因一致，E0235/E0310确认2个差异，发现两个issue
-      2,修复synReset之前遗漏pass list的bug,分析E0250 B4_130/B4_366误报，发现一个issue。
+   具体事项:分析门禁E0235/E0250/E0277/E0302/E0315/E0316/HDL_2371/HDL_1092 确认6个差异，发现9个bug
+   DTS描述:
+DTS2025103121486:always里面是三目运算，lint会识别出同步复位(但电路优化掉了mux),A工具不认为是同步复位，导致误报
+DTS2025103122688:read_design->check_lint->start_gui->violation选择SyncRSNotInput->message右键选择Open In Incremental Schematic ,未弹出电路图
+DTS2025103133782:信号作为ff的输出，又作为ff的if条件，通过get_syncr -all得知，lint AST 认为是复位信号，DB认为不是复位信号，A工具不认为它是复位信号，所以误报
+DTS2025103152632:输出用作同步复位，电路正常，lint报无复位，有问题
+DTS2025103149626:普通表达式中含有&运算符和1‘b?,lint对象报出1’b?,A工具只报?,但根据文档描述，是在条件表达式与三态信号比较才报，有出入，麻烦明确
+DTS2025103133955:常亮表达式出现在三目运算条件判断中，lint E0302支持，A工具不支持该场景，导致误报。
+DTS2025103141022:对于assign #xxx a=b中的有delay，A工具正常报错，lint漏报
+DTS2025103144123:未被使用的task中有违规，lint不报，A工具报，我觉得delay这种报出更合理
+DTS2025103144601:title：【ELINT】【LINT】【文档】【门禁】【HDL_2371】HDL_2371报错等级与文档不一致
+今日最费时问题：已汇报
 
-   DTS描述：
-      DTS2025103055004：综合电路中的确是一个同步电路，synReset脚本正确识别，lint误报
-      DTS2025103027444：对于被wire变量例化连接的inout信号，A工具不报错，lint报的wire信号定义处，A工具行为更为统一合理
-      DTS2025103027343：对于inout信号，A工具只报到未被例化连接的定义处，lint每个inout定义处都报，A工具更加合理
 
-   今日最费时问题：（什么事情，具体原因，有无建议）
-
-
-
-zxb
-   完成统计数据脚本
-   答复CA这边PV的问题（脚本、rule）
-
-mch
+zxb:
 今日分析rule数：
 今日分析msg数：
 今日发现issue数：
 日报：
-1、用elint 1028的arm包和x86版本的包跑29个新泛化，结果已出，还没来得及去比对。使用Ecdc 30号的arm包和x86的包跑29个新泛化case。
-2、review需要导出到桃花岛的问题单，有些复现case时提取的代码太长会在导出的时候被驳回，已经通知大家在提取的时候尽量用最小case复现。
-3、分析NFI_PHYG_TOP这个case的E0026和E0035这两条rule，E0026有一个问题单(DTS2025103047426,对于没有使用的inout端口，E没有报E0026,A报了)。E0035有8条是obj不同的差异，还有1条miss正在复现。
-今日最费时问题：（什么事情，具体原因，有无建议）
+   回答CA pv的疑问、
+   发现对比脚本bug：当rule忽略行号时，如果出现obj不匹配、会有多个一个Emessage统计到误报中（泛化case中发现）
+   发现继承脚本bug；由于分析和运行elint工具存在时间差；会导致部分结果继承不上去。 ---- 已解决
+    编写统计每个case报的rule的脚本
+今日最费时问题：已汇报
 
 
-jwq
-今日分析rule数：3 （一条正在分析）
-今日分析msg数：85
-今日发现issue数：2
+
+jwp
+今日分析rule数：6
+今日分析msg数：80
+今日发现issue数：3
 日报：
-1.分析完NFI_PHYG_TOP的E0085和E00145，确认79条bug
-2.正在分析NFI_PHYG_TOP的E0146,目前分析了6条，6条为差异
-3.修改了之前代码过长的DTS单
+1.分析完门禁case的E0296,E0086,E0118,HDL_1137,HDL_1011,HDL_1102,其中确认bug 74条，差异条数6条
    具体事项
    DTS描述：
-1.DTS2025101806879：未被使用的function中存在违规名称，未能正确报错，存在漏报
-2.DTS2025102310206： 在always块中，对触发器输出信号多次赋值时，存在漏报，且报错信息有误
-今日最费时问题：（什么事情，具体原因，有无建议）
+1.DTS2025103153234：漏报 E0296 赋值时左值位宽小于右值位宽被截断，但没有报错
+2.DTS2025103135069：误报E0118 未定义数组的端口仍然在always语句中当数组去判断
+3.DTS2025103140995：漏报HDL_1137 存在语法错误，误被当成枚举类型去判断
+
+今日最费时问题：已汇报
 
 
-
-lrf
-今日分析rule数：3
-今日分析msg数：17
-今日发现issue数：
+lrf:
+今日分析rule数：4
+今日分析msg数：9
+今日发现issue数：4
 日报：
 1.分析部分：
-1.1 Hi1813-NFI_PHYG_TOP-LINT
-a.分析rule E0027共4条msg,分析结论：ELINT BUG:DTS2025102819638(4)
-b.分析rule E0065共9条msg,分析结论：ELINT BUG:DTS2025102518079(9)
-c.分析rule E0154共4条msg,分析结论：ELINT BUG:DTS2025102013762(4)
-2.回归issue
-a.DTS2025101631827 门禁/lint 误报E0089
-b.DTS2025101632538 门禁/lint 误报E0089
-c.DTS2025101634516 门禁/lint 误报E0089
-d.DTS2025102053473 门禁/lint 漏报E0205
-今日最费时问题：NA
+1.1 门禁-Lint
+a.分析rule E0126共2条msg,分析结论：ELINT BUG:DTS2025103153920(1)/DTS2025103152554(1)
+b.分析rule HDL_2344共1条msg,分析结论：diff_b(1)/DTS2025103149454：.v在read_design阶段有"ERROR"相关的语法报错,A tool不会继续check_lint,ELINT会继续check_lint并报出相应的rule,容易对用户造成误解
+c.分析rule HDL_1060共1条msg,分析结论：diff_b(1)/sg在Design Read阶段报错,ELINT正常check lint,误报且合理
+d.分析rule HDL_1001共5条msg,分析结论：ELINT BUG:DTS2025103143554(5)
+2.其它
+2.1 参加PV周会
+2.2 协助川皓撰写测试报告
+2.3 编写脚本验证"测试报告用例集"
+
+今日最费时问题：同上次
 
 
-syh
-今日分析rule数：5
-今日分析msg数：670
-今日发现issue数：1
-日报：
-1.分析部分
-a.分析rule E0332，458条msg，均为DTS2025103032097，
-b.分析rule E0333，143条msg，均为diff_o
-c.分析rule E0339，32条msg，27条DTS2025102438456,5条DTS2025102438365
-d.分析rule E0344，34条msg，34均为diff_o
-e.分析rule E0170，3条msg，均为DTS2025102829084
-f.分析rule E0338，脚本问题，脚本没有抓到sg的msg，导致csv中仅存在elint的误报，已反馈鑫冰
-2.新增分析issue
-DTS2025103032097：if死分支Elint误报E0332
-3.回归分析issue：
-DTS2025101631500：漏报E0331
-DTS2025101628715：驱动instance的net实际是悬空的，只是有buf做为过渡。Enno漏报E331
-DTS2025102114329：综合不同导致误报E0260
-
-
-jr
-今日分析rule数：1
-今日分析msg数：153
-今日发现issue数：3
-日报：
-1.分析rule E0364，分析153条，144条是issue DTS2025103010467，119条是issue DTS2025103011115（issue标的message有重叠）；
-2.新增issue：
-2.1）DTS2025103010467：在ELINT中，E0364：The gated asynchronous 'reset' signal 'TOP/U_TOP1/in' is used for the flip-flop 'TOP/U_TOP1/dout[7]'的行号报在if(!in1)这一行，而A工具报的E0364：Gated reset 'TOP.U_TOP1.in' used for flip-flop 'TOP.U_TOP1.dout[7]'的行号报在dout <= din;这一行，已复现case；
-2.2）DTS2025103011115：ELINT报了16条E0364：The gated asynchronous 'reset' signal 'TOP/U_TOP1/in' is used for the flip-flop 'TOP/U_TOP1/dout[7:0]'和The gated asynchronous 'reset' signal 'TOP/U_TOP1_1/in1' is used for the flip-flop 'TOP/U_TOP1_1/dout[7:0]'，而A工具只报了2条E0364：Gated reset 'TOP.U_TOP1.in' used for flip-flop 'TOP.U_TOP1.dout[7]'和Gated reset 'TOP.U_TOP1_1.in' used for flip-flop 'TOP.U_TOP1_1.dout[7]'，ELINT多报了14条，这说明A工具只报了bus中的最高bit位，而ELINT报出了全部bit位，已复现case；
-2.3）DTS2025103037921：将db.use_hier_name_include_top设置为true，ELINT报的E0236为rst2，ELINT报的是错误的，不设置db.use_hier_name_include_top后，ELINT报的E0236为n12，ELINT报的是正确的，说明是db.use_hier_name_include_top设置为true导致ELINT误报E0236；
-3.回归issue：
-DTS2025102121104：漏报E0241--差异，阻塞导致的漏报；
-DTS2025102113209：误报E0239--综合差异；
-DTS2025102049663：误报E0236--综合差异；
-DTS2025101714922：误报E0036--已修复；
-DTS2025101619804：漏报E0027--版本差异；
-DTS2025101617418：误报E0027--版本差异；
-DTS2025101608974：误报E0022--已修复；
-今日最费时问题：统计测试报告用例集个数是否完整，在万林和瑞风的帮助下写了一个小脚本去统计，结果发现一些用例集里的sdc多了一个，已反馈；
-其他：在ECDC中，打开增量原理图，点击下方message objects中的某一个object，可以定位到原理图中的对应位置，不知道ELINT能否实现这个功能
-
-
-xkk
-今日分析rule数：
-今日分析msg数：
+jr:
+今日分析rule数：2
+今日分析msg数：4
 今日发现issue数：
 日报：
-   分析driveload脚本之后还失败的B4-case:E0316/E0310中objunmatch实际为hierarchy差异, 需要鑫冰处理；除此之外发现E0310存在差异：多比特时，elint合并报一条，而sg拆成了多条报，正在调试脚本进行处理
-今日最费时问题：（什么事情，具体原因，有无建议）
+   具体事项
+1.分析rule HDL_1279，共1条，是sg的bug；
+2.分析rule HDL_1295，共3条，是sg的bug；
+   
+今日最费时问题：已汇报
 
 
-wh
-今日分析rule数：
-今日分析msg数：
-今日发现issue数：
-日报：
-1.完成E0034的差异proc,该rule报告input端是常值的场景，当前如果是常值直连端口能够处理，如果是经过组合逻辑就没法判断常值的正确性了
-2.调试中发现diff流程中存在bug,已修复
-3.编写了一个方便根据csv中提供的.v，运行lint和sg的脚本
-4.
-
+wh 
+1.分析E0292，该rule分析完都是工具bug，DTS2025101722065
+2.整理了下根据csv中的case跑lint,sg的脚本
+3.完成E0034的差异ppt
 
 chy
-今日分析rule数：
-今日分析msg数：
-今日发现issue数：
+1.提单DTS2025103149541，误报E0364，经过常值计算后实际上只有一个信号2.到达了ff的rst端，不存在rs gated
+3.写diff统计脚本，已完成
+4.开cdc周会
+
+syh
+
+今日分析rule数：5
+今日分析msg数：67
+今日发现issue数：4
 日报：
-1.分析E0364误报差异，尝试写diff proc，进度100%
-2.提单DTS2025103045741：E0364的obj错误：TOP/
+lint分析：
+1.分析rule E0364，48条，全部是sg的bug；
+2.分析rule HDL_2204，2条，均为DTS2025103146724:
+3.分析rule HDL_1561，2条，均为DTS2025103152135
+4.分析rule HDL_1216，12条，10个diff_b,2个diff_o,但这12条msg均与doc中定义格式不同。和大家商量所有和doc中格式不同的msg均先标记doc_issue,最后汇总更改
+5.分析rule HDL_1265,3条，均为DTS2025103137306
+新增分析issue：
+1.DTS2025103154563：在!rstn分支内，由于输入信号in的不确定，确实可能同时存在对相同DFF的异步复位和异步置位。Atool不报，Elint误报E0253
+2.DTS2025103152135:漏报HDL_1561
+3.DTS2025103146724:不存在real关键字，但是ELINT仍报告HDL_2204
+4.DTS2025103137306:HDL_1265msg格式与doc中不同
+今日最费时问题：同上次
 
 
 
-
-今日分析rule数：18
-今日分析msg数：998
-今日发现issue数：9
-投入分析人数：6
-投入脚本：3
+今日分析rule数：39
+今日分析msg数：888
+今日发现issue数：31
+投入分析人数：6.5
+投入脚本：5
 投入数据分析，总结：1.5
