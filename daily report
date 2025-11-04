@@ -1,147 +1,110 @@
-lcx
-今日分析rule数：4
-今日分析msg数：78
-今日发现issue数：5
+马杰/夏康凯	"今日分析rule数量：4
+分析message 数量：21801
+提交DTS数量：3
 日报：
-   1，发lint项目每天的日报；
-   2，和春豪一起统计今日分析数据；
-   3，分析完门禁的E0281,E0294,E0297,HDL_1098;
-   DTS2025103154082:for语句里面报了比较运算符两边位宽不一致；
-   DTS2025103152688：函数传常值不能正确识别位宽大小；
-   DTS2025103138649：端口列表里面只写端口信号，下面声明输入输出，这种不应该报重复定义；
-   DTS2025103133938：for语句里面的片选循环变量，这种应该是一位位宽的；
-  DTS2025103121013：动态数组new(3)的位宽应该是多少位,需要RD和PE确认；
-今日最费时问题：已汇报
+分析TOP_LGC:
+      HDL_2199：分析 17条，发现1个dts:
+            DTS2025110326374:对于被celldefine标记的单元中的specify,lint会检查，A工具不会检查(`celldefine相当于封装了这个module,综合时不会对内部再进行检查)
+      E0061：分析3887条，sg执行结果有问题，本地跑正常报错于lint一致,已反馈
+      E0364:16007条message抽样分析，确认两个差异
+            误报diff：报错电路真实存在，脚本解决
+            漏报diff：lint电路有对应的报错，只是对于门控信号对象和行号不一致，脚本解决
+      E0292:分析1890条，确认一个差异，发现2个dts
+            误报diff：拼接的位宽，我们采取实际值，忽略前面的0,sg不忽略，可用位宽脚本解决
+            DTS2025110334432：非顶层及其instance中import的package,lint E0299不关注,
+            DTS2025110335964：对于由变量控制的三目表达式，实际位宽要考虑所有分支
+今日费时问题：已汇报
+日报（xkk）
+1. 分析TOP_LGC中E0233 objunmatch的msg，实际是同一条net, 正在尝试用脚本处理（在字符比对之前对enno的obj进行get_nets -canonical）
+2. E0233中误报的msg中，或门的两个input和output都会报，一共报3条，需要谢天分析是否正确
+"
 
-
-zky:
-今日分析rule数：11
-今日分析msg数：322
-今日发现issue数：6
+刘昌祥/陈海洋	"今日分析rule数量：1+1doing
+分析message 数量：500+300
+提交DTS数量：1
 日报：
-分析门禁case：
-DTS2025103120214：当index使用1'b?时，elint误报E0149，根据spec，该rule只报x，z
-DTS2025103123694：check_lint -filter {@enno_id == “E0253”} 统计出两条rule（谢天说HDL相关的会出现这种现象，是正常的）
-DTS2025103133879：ff有异步复位没有异步置位信号（未出现在敏感列表内的信号不应该是置位/复位信号），elint误报E0253
-DTS2025103144615：check_lint -filter {@enno_id== “HDL_1273” 过滤rule错误}，应该对应HieRefNotSynth这条rule，显示NetExtConnDisallowed这条rule
-DTS2025103144696：代码中出现变量使用层次化引用，elint漏报HDL_1273
-DTS2025103152010：位宽报的和算法不一致，本身匹配的，算错导致误报
-DTS2025103154437：clock被门控，elint漏报
-今日最费时问题：已汇报
+      提单DTS2025110339863 E0239增量原理图显示的有问题，第一个obj没有显示，也没有连接关系
 
+E0239分析了几条：
+1，obj1：类型为net，主要为层次不同导致不匹配，可以使用最外层net
+2，obj2：rst信号来源的flop，多负载flop时sg和我们的inst不一样，可以使用该flop rst pin所连接的最外层线网
+可以归为obj no match
+3，回归了4个issue
+4，把手上除了分析的任务都交接给鑫冰；
+今日费时问题：A工具复现case时经常出现license问题，有时启动不了，有时正在分析突然就挂掉了，换了不同的版本也经常出现这种问题；"
 
-mj
-今日分析rule数：8
-今日分析msg数：328
-今日发现issue数：9
-日报：
-   具体事项:分析门禁E0235/E0250/E0277/E0302/E0315/E0316/HDL_2371/HDL_1092 确认6个差异，发现9个bug
-   DTS描述:
-DTS2025103121486:always里面是三目运算，lint会识别出同步复位(但电路优化掉了mux),A工具不认为是同步复位，导致误报
-DTS2025103122688:read_design->check_lint->start_gui->violation选择SyncRSNotInput->message右键选择Open In Incremental Schematic ,未弹出电路图
-DTS2025103133782:信号作为ff的输出，又作为ff的if条件，通过get_syncr -all得知，lint AST 认为是复位信号，DB认为不是复位信号，A工具不认为它是复位信号，所以误报
-DTS2025103152632:输出用作同步复位，电路正常，lint报无复位，有问题
-DTS2025103149626:普通表达式中含有&运算符和1‘b?,lint对象报出1’b?,A工具只报?,但根据文档描述，是在条件表达式与三态信号比较才报，有出入，麻烦明确
-DTS2025103133955:常亮表达式出现在三目运算条件判断中，lint E0302支持，A工具不支持该场景，导致误报。
-DTS2025103141022:对于assign #xxx a=b中的有delay，A工具正常报错，lint漏报
-DTS2025103144123:未被使用的task中有违规，lint不报，A工具报，我觉得delay这种报出更合理
-DTS2025103144601:title：【ELINT】【LINT】【文档】【门禁】【HDL_2371】HDL_2371报错等级与文档不一致
-今日最费时问题：已汇报
-
-
-zxb:
-今日分析rule数：
+张凯阳/王涵	"今日分析rule数：2（HDL_1214、E0236）
 今日分析msg数：
-今日发现issue数：
+HDL_1214：100/100
+E0236：413/557
+今日发现issue数：2
+日报（zky）：
+分析泛化case：
+DTS2025110334841：在message table或代码界面ctrl f搜索或open in source时，偶尔会卡顿，为非阻塞问题
+DTS2025110326237：误报HDL_1214，input信号连接到inout端口，此inout端口未被驱动，input应该也是没有驱动的，elint误报HDL_1214
+回归门禁case：closed：6
+日报（wh）：
+1.分析TOP_LGC的HDL_2371，分析共60几条，两个场景
+    1）assign赋值左侧使用延迟为报错：DTS2025110326527
+    2）generate块中使用未报告，小case未复现
+2.强化E0034的差异，补充了前面接了buf和inverter的场景
+今日最费时问题：已汇报"
+
+莫春豪	"今日分析rule数量：2
+分析message 数量：4
+提交DTS数量：1
 日报：
-   回答CA pv的疑问、
-   发现对比脚本bug：当rule忽略行号时，如果出现obj不匹配、会有多个一个Emessage统计到误报中（泛化case中发现）
-   发现继承脚本bug；由于分析和运行elint工具存在时间差；会导致部分结果继承不上去。 ---- 已解决
-    编写统计每个case报的rule的脚本
-今日最费时问题：已汇报
+1、分析TOP-LGC的HDL_1158，E误报`disable_portfaults和`nosuppress_faults,verfic识别不了这两个关键字，A工具可以，所以A工具没有报。可以认为是差异。
+2、分析TOP-LGC的E0209，提了一个DTS单(DTS2025110336345)，信号在Attributes窗口显示的位宽是正确的，但是在Violation Tree所报的位宽不正确，导致误报。
+3、更新sg的4个新泛化和门禁的result，sg check的rule为RD提供的elint计划开发的elint的275条对应的rule，当前现场版本sg没有(NoConstWithXZ(HDL-1102))这条rule。
+4、使用verific_update202509包跑4个新泛化和门禁的结果。
+      具体事项（提交的DTS\以及描述）
+今日费时问题：已汇报"
 
-
-
-jwp
-今日分析rule数：6
-今日分析msg数：80
-今日发现issue数：3
+戢玮淇	"今日分析rule数量：3
+分析message 数量：37
+提交DTS数量：3
 日报：
-1.分析完门禁case的E0296,E0086,E0118,HDL_1137,HDL_1011,HDL_1102,其中确认bug 74条，差异条数6条
-   具体事项
-   DTS描述：
-1.DTS2025103153234：漏报 E0296 赋值时左值位宽小于右值位宽被截断，但没有报错
-2.DTS2025103135069：误报E0118 未定义数组的端口仍然在always语句中当数组去判断
-3.DTS2025103140995：漏报HDL_1137 存在语法错误，误被当成枚举类型去判断
+1.分析泛化caseTOP_LGC的E0078,E0035和E0258
+2.正在分析E0267
+DTS2025110325357： primitive语法中table表有Z的值，误报output z is not set
+DTS2025110327084：  module有报相关output is not set，但是小case{无法复现}
+DTS2025110335034：误报E0078 抽出小case{无法复现}
+今日费时问题：已汇报"
 
-今日最费时问题：已汇报
-
-
-lrf:
-今日分析rule数：4
-今日分析msg数：9
-今日发现issue数：4
+齐景烁	"今日分析rule数量：2
+分析message 数量：14
+提交DTS数量：1
 日报：
-1.分析部分：
-1.1 门禁-Lint
-a.分析rule E0126共2条msg,分析结论：ELINT BUG:DTS2025103153920(1)/DTS2025103152554(1)
-b.分析rule HDL_2344共1条msg,分析结论：diff_b(1)/DTS2025103149454：.v在read_design阶段有"ERROR"相关的语法报错,A tool不会继续check_lint,ELINT会继续check_lint并报出相应的rule,容易对用户造成误解
-c.分析rule HDL_1060共1条msg,分析结论：diff_b(1)/sg在Design Read阶段报错,ELINT正常check lint,误报且合理
-d.分析rule HDL_1001共5条msg,分析结论：ELINT BUG:DTS2025103143554(5)
-2.其它
-2.1 参加PV周会
-2.2 协助川皓撰写测试报告
-2.3 编写脚本验证"测试报告用例集"
+      1.对于FF output作为clk的情况，分析了我们报的message ,elint考虑了常值和电路结构，没有问题。
+      2.DTS2025110340784  在for语句循环中，(i=1;i<4;i=i+1),应该是循环三次，报三条CondContainConstExpr.但elint报了四条。
+      3.分析CDC，1031日develop包的结果，XXE的APP_CPE有conv新增一条，本地跑的结果没有这条。可能是随机性问题，需要多跑几次测试。
+      4.完善ipe和epe的运行对比脚本，适配nile平台。
+今日费时问题：已汇报"
 
-今日最费时问题：同上次
+殷艺豪	"日报：
+      1.debug driver_load脚本bug并修复 
+      2.debug位宽脚本bug，找到了问题根因，给出了解决方案，鑫冰做优化
+      3.与谢天沟通E0364的bug
+今日费时问题：debug位宽脚本 ，因为对脚本不够熟悉，花了 一些时间在理清逻辑上面 "
 
 
-jr:
-今日分析rule数：2
-今日分析msg数：4
-今日发现issue数：
-日报：
-   具体事项
-1.分析rule HDL_1279，共1条，是sg的bug；
-2.分析rule HDL_1295，共3条，是sg的bug；
+钟鑫冰	"日报：
+      1.fix 继承脚本bug
+      2.与家里RD对接：
+           2.1找出还没有同步的门禁的DTS单、并同步
+           2.2通过RD给出的DTS单、对比执行driverload后的门禁结果
+     3.统计数据
+今日费时问题：已汇报"
+
+
+
+issue数量：
+   门禁：65（20个待回归）
+   泛化：94（5个待回归）
+   分析：TOP_XXX（100）
+      需要分析的rule：54
+      分析完成的：14（fail：9 pass：5）
+      需要分析的message数量：33737（误报：28997 漏报：4740）
+      分析完成的：20335（误报：19620 漏报：715）
    
-今日最费时问题：已汇报
-
-
-wh 
-1.分析E0292，该rule分析完都是工具bug，DTS2025101722065
-2.整理了下根据csv中的case跑lint,sg的脚本
-3.完成E0034的差异ppt
-
-chy
-1.提单DTS2025103149541，误报E0364，经过常值计算后实际上只有一个信号2.到达了ff的rst端，不存在rs gated
-3.写diff统计脚本，已完成
-4.开cdc周会
-
-syh
-
-今日分析rule数：5
-今日分析msg数：67
-今日发现issue数：4
-日报：
-lint分析：
-1.分析rule E0364，48条，全部是sg的bug；
-2.分析rule HDL_2204，2条，均为DTS2025103146724:
-3.分析rule HDL_1561，2条，均为DTS2025103152135
-4.分析rule HDL_1216，12条，10个diff_b,2个diff_o,但这12条msg均与doc中定义格式不同。和大家商量所有和doc中格式不同的msg均先标记doc_issue,最后汇总更改
-5.分析rule HDL_1265,3条，均为DTS2025103137306
-新增分析issue：
-1.DTS2025103154563：在!rstn分支内，由于输入信号in的不确定，确实可能同时存在对相同DFF的异步复位和异步置位。Atool不报，Elint误报E0253
-2.DTS2025103152135:漏报HDL_1561
-3.DTS2025103146724:不存在real关键字，但是ELINT仍报告HDL_2204
-4.DTS2025103137306:HDL_1265msg格式与doc中不同
-今日最费时问题：同上次
-
-
-
-今日分析rule数：39
-今日分析msg数：888
-今日发现issue数：31
-投入分析人数：6.5
-投入脚本：5
-投入数据分析，总结：1.5
