@@ -27,8 +27,9 @@ GUI需求：
    2,分析门禁2条rule;
    3,回归了7DTS，5closed，2reopen;
 DTS2025111923819:根据电路图来看，形成了环应该报E0344,但是elint没报；
-DTS2025111922736：A报在声明TOP的位置（in1-in2），elint报在TOP层赋值的位置（in2-in1），导致漏报和误报;
-
+DTS2025111922736：A报在声明TOP的位置（in1-in2），elint报在TOP层赋值的位置（in2-in1）;
+DTS2025111920409：两个信号互相赋值，elint报的是第一个（tmp1-tmp），A报的是第二个(tmp-tmp1)；
+DTS2025111917516：function有个if语句且含有else if的情况，elint误报E0205；
 今日费时问题：已汇报"
 陈海洋	"今日分析rule数量：
 分析message 数量：
@@ -97,7 +98,8 @@ GUI需求：
 GUI需求：
 日报：
       1.统计case数据
-      2.分配分析门禁case任务、并统计数据
+      2.分配分析任务
+      3.帮助定位问题
 今日费时问题：已汇报"
 莫春豪	"今日分析rule数量：1
 分析message 数量：47
