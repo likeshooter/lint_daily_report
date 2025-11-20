@@ -1,3 +1,4 @@
+	
 马杰	"今日分析rule数量：16
 分析message 数量：175
 提交DTS数量： 4
@@ -14,35 +15,36 @@
 提交DTS数量： 
 GUI需求：
 日报：
-      具体事项（提交的DTS\以及描述）
-今日费时问题：如果有请描述、没有则写已汇报"
-刘昌祥	"今日分析rule数量：15
-分析message 数量：837
-提交DTS数量： 2
+    分析TOP_LGC的E0233，目前看的msg都是clock的差异，以及多比特的合并/拆分差异
+    桃花脚本适配指定人为空的场景
+今日费时问题：已汇报"
+刘昌祥	"今日分析rule数量：5
+分析message 数量：61
+提交DTS数量： 4
 GUI需求：
 日报：
-   1,分析TOP_LGC一条rule;
-   2,分析门禁14条rule;
-DTS2025111844018:parameter reg a=8'bz0 elint报了a的位宽是1；A没有报E0291,但是通过get_width获取这个a的位宽是3578057600bit;
-DTS2025111844003：elint漏报E0292，get_width 位选移位的位宽计算错误“mema[idx2]) >> 8的位宽是30bit”
+   1,分析NFI_PYJYG_TOP一条rule;
+   2,分析门禁2条rule;
+   3,回归了7DTS，5closed，2reopen;
+DTS2025111923819:根据电路图来看，形成了环应该报E0344,但是elint没报；
+DTS2025111922736：A报在声明TOP的位置（in1-in2），elint报在TOP层赋值的位置（in2-in1），导致漏报和误报;
+
 今日费时问题：已汇报"
 陈海洋	"今日分析rule数量：
 分析message 数量：
 提交DTS数量： 
 GUI需求：
 日报：
-分析泛化:
-    1. AO_SUB: 16条rule
-    2. TOP_LGC: 15条rule
-提单:
-    DTS2025111828125 - 漏报E0314, pin前面有个buffer
-    DTS2025111817149 - 漏报E0246, elint只报了if分支的msg, 但else分支也有同样的问题
-分析Diff_ca_026/E0250:
-    1. 在ff的r/s未连接的情况下, 由于elint综合ff带r/s, 三方不带, elint会漏报
-    2. 部分obj无法处理, 可能需要标记为综合差异例如：
-        inv.mem 找不到, inv[0]/mem才找得到
-        AAA.inst_1.mem 找不到, AAA/mem才找得到
-
+提单: DTS2025111935111 - 误报E0339，参数没有写在模块头部写，实例化时，使用.xxx(xxx)的方式去传递参数不应该报
+加强s obj转为e obj的proc
+    1. 加强pin类转换: CLR->r, PRE->s, EN->s, D-> d,Q ->q,CP ->clk
+    2. 加强reg类转换: Q_D_reg->Q_D， Q_D_reg[0]->Q_D[0]
+    3. 加强非连续bus转换: q[5,3:0]
+    *. 部分obj无法处理, 例如:
+        a) inv.mem 找不到, inv[0]/mem才找得到
+        b) AAA.inst_1.mem 找不到, AAA/mem才找得到
+        c) rtlc_Ixxx类的无法转换, 带该字符串的为s 内部生成
+分析了FE_TSS: 4个rule
 今日费时问题：已汇报"
 张凯阳	"今日分析rule数量：11
 分析message 数量：765
@@ -59,17 +61,22 @@ GUI需求：
 GUI需求：
 日报：
  分析泛化:
-1. AO_SUB: 12条rule
-2. TOP_LGC: 14条rule
-3.
+1.分析rule是否可做差异
+E0324：参数定义的位宽被当成1，有dtsDTS2025111018647
+E0236:误报已做差异，漏报和误报是匹配的，报告的对象不一致，漏报需再处理
+E0228：可以做差异，可判断报告的对象是否在当前模块是否有被作为ff的clk，需要获取单前所在module的fanout，但是目前无法获取到这个条件的fanout
+E0085:function定义的input为大写，三方报告，enno未报，DTS2025110534567，该dts已develop，但单前仍未报，待开发确认
 今日费时问题：已汇报"
-戢玮淇	"今日分析rule数量：
-分析message 数量：
-提交DTS数量： 
+戢玮淇	"今日分析rule数量：3
+分析message 数量：80
+提交DTS数量： 1
 GUI需求：
 日报：
+1.回归门禁case，修改total.csv
+2.分析NFI TOP的E0331,E0085,E0330
+DTS2025111930477：漏报 E0331 漏报对应net的message，A报了{小case无法复现}
       具体事项（提交的DTS\以及描述）
-今日费时问题：如果有请描述、没有则写已汇报"
+今日费时问题：已汇报"
 齐景烁	"今日分析rule数量：
 分析message 数量：
 提交DTS数量： 
@@ -92,13 +99,16 @@ GUI需求：
       1.统计case数据
       2.分配分析门禁case任务、并统计数据
 今日费时问题：已汇报"
-莫春豪	"今日分析rule数量：
-分析message 数量：
-提交DTS数量： 
+莫春豪	"今日分析rule数量：1
+分析message 数量：47
+提交DTS数量： 0
 GUI需求：
 日报：
+1、解答在试用ecdc工具的客户的问题，发现read_sgdc这个proc目前不支持在sgdc文件中include其他sgdc文件的使用场景。
+2、对比ecdc 1117版本arm和x86的性能数据对比，发现由于在跑的arm的flow脚本中比x86的多了一个操作，导致arm的runtime约为x86的1.3~1.6倍左右，现已经更改脚本使flow相同。
+3、分析NFI_PHYG_TOP的E0306，发现报的msg中hierarchy不正确，通过Design Tree一层一层去查找，发现最后一个instance并不存在。大约涉及47条msg.
       具体事项（提交的DTS\以及描述）
-今日费时问题：如果有请描述、没有则写已汇报"
+今日费时问题：已汇报"
 陈全鑫	"今日分析rule数量：
 分析message 数量：
 提交DTS数量： 
