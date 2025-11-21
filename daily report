@@ -1,81 +1,85 @@
 	
-马杰	"今日分析rule数量：16
-分析message 数量：175
-提交DTS数量： 4
+马杰	"今日分析rule数量：
+分析message 数量：
+提交DTS数量： 
+GUI需求：
 日报：
-    分析门禁新增问题16个rule共175个message,发现4个问题，2个差异，1个待确认
-        DTS2025111844314:E0092对于T3，A工具报到实际执行分支else if所在行，lint报到else所在行
-        DTS2025111844481:E0092对于包含1'b?的表达式，A工具不处理，lint会报到实际电路对应处导致误报
-        DTS2025111844611:E0093对于包含1'b?的表达式，A工具不处理，lint会报到实际电路对应处导致误报
-        DTS2025111844838:E0093对于多位的信号，A工具合并报，lint分开每位报
-    验证关闭4个问题单
-今日费时问题：已汇报"
+      具体事项（提交的DTS\以及描述）
+今日费时问题：如果有请描述、没有则写已汇报"
 夏康凯	"今日分析rule数量：
 分析message 数量：
 提交DTS数量： 
 GUI需求：
 日报：
-    分析TOP_LGC的E0233，目前看的msg都是clock的差异，以及多比特的合并/拆分差异
-    桃花脚本适配指定人为空的场景
+    解决obj多了{}导致msg匹配失败的问题
+    DTS2025112026501: flop的output除了load自己之外，还有其他load， elint误报E0320; 同时待柯杰分析后, 脚本需要重新适配E0320
+    正在分析E0321: driveload脚本和之前diff.tcl有相同的脚本框架问题，正在修改中
 今日费时问题：已汇报"
-刘昌祥	"今日分析rule数量：5
-分析message 数量：61
-提交DTS数量： 4
+刘昌祥	"今日分析rule数量：8
+分析message 数量：224
+提交DTS数量： 2
 GUI需求：
 日报：
-   1,分析NFI_PYJYG_TOP一条rule;
-   2,分析门禁2条rule;
-   3,回归了7DTS，5closed，2reopen;
-DTS2025111923819:根据电路图来看，形成了环应该报E0344,但是elint没报；
-DTS2025111922736：A报在声明TOP的位置（in1-in2），elint报在TOP层赋值的位置（in2-in1）;
-DTS2025111920409：两个信号互相赋值，elint报的是第一个（tmp1-tmp），A报的是第二个(tmp-tmp1)；
-DTS2025111917516：function有个if语句且含有else if的情况，elint误报E0205；
-今日费时问题：已汇报"
-陈海洋	"今日分析rule数量：
-分析message 数量：
-提交DTS数量： 
+    1，分析了门禁2rule;
+    2，分析了NFI_PYHYG_TOP五条rule;
+    3，分析TOP_LGC一条rule；
+    4，协助RD复现问题；
+DTS2025112036825:违例模块例化两次，传了参数，且违例在generate for语句里面；elint只走了一个例化路径，报了两次（参数好像未更新），A走了两个例化路径，但是generate for 只报一次；
+DTS2025112034996:elint没有的层次没有报块名，A工具报了；并且elint gui的Design Tree里面都有块名；
+今日费时问题：从当前case里面的例化的模块去打开对应的case;希望实现从gui当前的case例化的位置打开对应的case;"
+陈海洋	"今日分析rule数量：2
+分析message 数量：500
+提交DTS数量： 2
 GUI需求：
 日报：
-提单: DTS2025111935111 - 误报E0339，参数没有写在模块头部写，实例化时，使用.xxx(xxx)的方式去传递参数不应该报
-加强s obj转为e obj的proc
-    1. 加强pin类转换: CLR->r, PRE->s, EN->s, D-> d,Q ->q,CP ->clk
-    2. 加强reg类转换: Q_D_reg->Q_D， Q_D_reg[0]->Q_D[0]
-    3. 加强非连续bus转换: q[5,3:0]
-    *. 部分obj无法处理, 例如:
-        a) inv.mem 找不到, inv[0]/mem才找得到
-        b) AAA.inst_1.mem 找不到, AAA/mem才找得到
-        c) rtlc_Ixxx类的无法转换, 带该字符串的为s 内部生成
-分析了FE_TSS: 4个rule
-今日费时问题：已汇报"
-张凯阳	"今日分析rule数量：11
-分析message 数量：765
-提交DTS数量： 1
-DTS2025111844703：顶层output应该默认被load，elint误报
+提单:
+    1. DTS2025112006563 - 【ELINT】【LINT】【误报】【Gen02-m103】【E0078】误报E0078
+    2. DTS2025112005781 - 【ELINT】【LINT】【漏报】【Gen02-m006】【E0339】漏报E0339，定义module时参数写在头部，实例化时使用.xxx(xxx)的形式但没写满漏报
+由于E0339误报漏报无法提取小case: 
+    1. 和研发debug了误报漏报原因, 发现18sp2和家里的版本存在差异
+    2. lint.checkv2kparamsonly为false时非const类型的参数不应该忽略
+    3. 关于v2k参数: 
+        Verilog module parameter写法有两种, 1是写在头部, 2是写在module内部
+        写法1不受v2k参数控制, 写法2受v2k参数控制
+cdc: 
+    1. 给景硕添加builtin自对比出summary的功能
+    2. 给心雨讲builtin自对比脚本如何添加diff对比和反标功能
+
+今日费时问题：已汇报
+"
+张凯阳	"今日分析rule数量：6
+分析message 数量：912
+提交DTS数量： 3
+1.分析门禁和泛化的message
+2.回归DTS单，closed：13
+DTS2025112002176:信号分别穿过MUX后连接到clock和ff的D端，elint漏报这种情况
+DTS2025112014499:package内的违例，当package没有实例化在顶层或顶层实例化的instance中时，A工具可以报出这条rule，elint不报E0294
+ky_1120_01:elint在B4_256报了Hierarchy，在B4_260又没报Hierarchy，不统一
 GUI需求：
 日报：
-分析门禁case
-回归DTS单：closed：1
+      具体事项（提交的DTS\以及描述）
 今日费时问题：如果有请描述、没有则写已汇报"
 王涵	"今日分析rule数量：
 分析message 数量：
 提交DTS数量： 
 GUI需求：
 日报：
- 分析泛化:
-1.分析rule是否可做差异
-E0324：参数定义的位宽被当成1，有dtsDTS2025111018647
-E0236:误报已做差异，漏报和误报是匹配的，报告的对象不一致，漏报需再处理
-E0228：可以做差异，可判断报告的对象是否在当前模块是否有被作为ff的clk，需要获取单前所在module的fanout，但是目前无法获取到这个条件的fanout
-E0085:function定义的input为大写，三方报告，enno未报，DTS2025110534567，该dts已develop，但单前仍未报，待开发确认
+1.分析rule做差异：
+    E0191:误报未工具bug,已修复，漏报为package中定义的function在和指定的top无关的module中import,属于差异，但是目前没有手段知道package在哪个module被import了，该module是否在顶层中也未知,前面已在家里提了需求issue
+    E0246:DTS2025111213801工具bug,delay是小数，漏报
+    E0228:clk不是module的input，工具bug，三方的行为不一致，待pe确认
+2.增加脚本debug信息，可看运行到哪个proc可打印错误命令
 今日费时问题：已汇报"
-戢玮淇	"今日分析rule数量：3
-分析message 数量：80
-提交DTS数量： 1
+戢玮淇	"今日分析rule数量：5
+分析message 数量：26
+提交DTS数量：1
 GUI需求：
 日报：
-1.回归门禁case，修改total.csv
-2.分析NFI TOP的E0331,E0085,E0330
-DTS2025111930477：漏报 E0331 漏报对应net的message，A报了{小case无法复现}
+1.分析门禁case的E0299
+2.分析TOP_LGC的E0229
+3.分析NFI的E0180,E0308,E0324
+4.修改之前的DTS单代码
+DTS2025112031801：误报E0229 把rst信号也当成了clk信号处理，{小case无法复现}
       具体事项（提交的DTS\以及描述）
 今日费时问题：已汇报"
 齐景烁	"今日分析rule数量：
@@ -92,25 +96,22 @@ GUI需求：
 日报：
       具体事项（提交的DTS\以及描述）
 今日费时问题：如果有请描述、没有则写已汇报"
-钟鑫冰	"今日分析rule数量：2
-分析message 数量：4
+钟鑫冰	"今日分析rule数量：
+分析message 数量：
 提交DTS数量： 
 GUI需求：
 日报：
       1.统计case数据
-      2.分配分析任务
-      3.帮助定位问题
+      2.分配新数据任务
+      3.根据csv修改继承脚本
 今日费时问题：已汇报"
-莫春豪	"今日分析rule数量：1
-分析message 数量：47
-提交DTS数量： 0
+莫春豪	"今日分析rule数量：
+分析message 数量：
+提交DTS数量： 
 GUI需求：
 日报：
-1、解答在试用ecdc工具的客户的问题，发现read_sgdc这个proc目前不支持在sgdc文件中include其他sgdc文件的使用场景。
-2、对比ecdc 1117版本arm和x86的性能数据对比，发现由于在跑的arm的flow脚本中比x86的多了一个操作，导致arm的runtime约为x86的1.3~1.6倍左右，现已经更改脚本使flow相同。
-3、分析NFI_PHYG_TOP的E0306，发现报的msg中hierarchy不正确，通过Design Tree一层一层去查找，发现最后一个instance并不存在。大约涉及47条msg.
       具体事项（提交的DTS\以及描述）
-今日费时问题：已汇报"
+今日费时问题：如果有请描述、没有则写已汇报"
 陈全鑫	"今日分析rule数量：
 分析message 数量：
 提交DTS数量： 
@@ -125,3 +126,28 @@ GUI需求：
 日报：
       具体事项（提交的DTS\以及描述）
 今日费时问题：如果有请描述、没有则写已汇报"
+
+
+
+
+功能情况（4个关键case）：
+  18XXE-TXXX：
+      pass的rule: 72/118
+      漏报误报率： 15% 6%->7% 8% -> 4% 4% > 4.74% 4.99% > 3.98% 5.13% > 2.8% 2.6% > 3.69% 1.42%
+      DTS:58>62 > 58 > 50 > 51 > 55 > 54
+      剩余待分析msg：616(未算位宽)
+  LXXX-AOXXX：
+      pass的rule:  56/89
+      漏报误报率：  8.00% 11.72% > 4.71% 6.85% >3.89% 8.06%
+      DTS:41->51 -> 45 -> 42 -> 40
+      需要分析的message：34(未算位宽)
+  18XX-NFIXX：
+       pass的rule: 37/87
+      漏报误报率： 28%16%->6% 9% -> 6% 9% > 7.76% 9.21% >3.55 8.9% > 4.0% 2.7%
+      DTS:29
+      需要分析的message：2391(未算位宽)
+
+  1813-FE_XXX
+      pass的rule: 56/89
+      漏报误报率： 21% 23%->21% 20% -> 10% 18% > 9.99% 29.43% > 8.92% 21.89% >9.94% 8.65%
+      需要分析的message：20802
