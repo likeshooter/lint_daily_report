@@ -109,3 +109,27 @@ GUI需求：
 3、统计cdc arm和x86的性能数据，从结果看，arm的runtime只有一个case优于x86，其他case的runtime arm的表现比x86的差，arm和x86的数据都是在nile平台上run的，不确定数据是否可靠。使用今天的包在nile平台和本地都跑了一遍，如果明天nile平台上和本地跑的结果都是arm的runtime比x86d的差，说明近期的版本存在arm的runtime比x86差的问题。如果本地的结果是arm的性能优于x86的，说明可能nile平台上arm的资源比x86的少，工具本身没有问题。
       具体事项（提交的DTS\以及描述）
 今日费时问题：如果有请描述、没有则写已汇报"
+
+
+功能情况（4个关键case）：（都没有包含位宽的rule）
+  18XXE-TXXX：
+      pass的rule: 72/118
+      漏报误报率：  1.34% 3.5%
+      DTS：1
+      剩余待分析msg：532
+  LXXX-AOXXX：
+      pass的rule:  58/89
+      漏报误报率： 4.71% 6.46%
+      DTS：40
+      需要分析的message：18
+  18XX-NFIXX：
+       pass的rule: 41/87
+      漏报误报率： 2.54% 3.84%
+      DTS：45
+      需要分析的message：75
+
+  1813-FE_XXX
+      pass的rule: 30/87
+      漏报误报率：8.68% 9.97%
+      DTS: 12
+      需要分析的message：3622
