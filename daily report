@@ -1,132 +1,136 @@
-	日报
-马杰	"今日分析rule数量：
+"今日分析rule数量：2
+分析message 数量：32
+提交DTS数量：2 
+日报：
+    1,验证回归9个DTS,7个非问题，2个问题解决
+    2，分析FE_TSS HDL_1102(1/1):已知问题DTS2025111917180
+    3，分析NFI_PYHYG_TOP E0220(31/71):发现2个问题，1个差异
+        DTS2025112466592:对于[0:0] A工具不认为是数组，lint会认为是数组导致误报
+        DTS2025112440007:点击design_tree的instance，右键open in source进入实际代码，右键信号选择copy(Hier name) 获取的值是固定为最后一次的instance路径，与前面选择的路径不一致
+今日费时问题：
+    1,在violation tree里面只能搜索instance名，不能包含hierarchy,存在多次例化时就不能直接找到对应instance，希望能有方法通过hierarchy准确定位到唯一instance"
+"今日分析rule数量：
+分析message 数量：
+提交DTS数量： 
+GUI需求：
+日报：
+      调试driveload脚本，分析E0320和E0321的数据，发现E0321和sg报的net的位置不一样(我们报在undriven的位置, sg报的位置存在随机)，已通过脚本处理
+今日费时问题：已汇报"
+"今日分析rule数量：11
+分析message 数量：1176
+提交DTS数量： 3
+GUI需求：
+日报：
+    1，分析NFI_PYHYG_TOP 9条rule,大部分都是issue还未修复的；
+    2，分析TOP_LGC和FE_TSS两条rule都是issue未修复的；
+DTS2025112470182：check_lint -filter {@enno_id==""E0339""} 这里的enno_id写错，没有提示；把@enno_id写成@enn_id，@enni_id,@enno等这些错误形式，不会报任何提示，会正常走check_lint，但是不会检查rule，容易造成误判没报这条rule；
+DTS2025112410523:elint的hierarchy没有从顶层开始报;
+DTS2025112408406:给时钟信号赋值的位置在例化的位置，elint报一条，A报两条；
+今日费时问题：上午我的sg工具存在一直很卡的情况，导致复现case的时候每次都要跑五分钟以上（小case）,下午没卡了；"
+"今日分析rule数量：
+分析message 数量：
+提交DTS数量： 
+GUI需求：
+日报：
+回归1个dts
+修复obj转换的问题涉及E0239, 
+添加统计rule脚本, 指定排除存在dts单/差异的msg
+
+今日费时问题：已汇报"
+"今日分析rule数量：10
+分析message 数量：641
+提交DTS数量：5
+日报：
+1.回归DTS单，closed：1
+2.和谢天讨论泛化2个未复现issue并找到问题
+3.分析门禁和泛化case
+DTS2025112401928：parameter多次重定向，elint漏报E0251
+DTS2025112433131：对于index含参数的非压缩数组，参数重定义，elint报的msg有时是重复且看起来没必要的
+DTS2025112447249：嵌套if case语句出现多次赋值，elint漏报（嵌套的if、for、case均可能出现漏报场景，改的时候建议都看下这几种情况的逻辑）
+DTS2025112459646：always块变量动态位选在if else分支，if分支的动态位选变量是for循环下的integer i，无论i的取值范围限制在赋值变量的range内还是外，elint都误报E0146，分析认为：
+1.if分支的动态位选变量限制在赋值变量的range内，此时和else分支的动态位选变量是小于或等于的关系，这种情况可能出现index变量位宽相等、不等，值相等、不等几种情况，可能会导致出现违例情景（类似DTS2025110802865）
+2.if分支的动态位选变量的range大于赋值变量的range，此时出现位宽越界的情况，A报SYNTH_5255综合错误，elint仍然报E0146，综合认为这种情况也不应该报
+ky_1124_01：综合出来是自己load自己且没有穿过其他器件，应该不能算load，elint漏报，object：RandSyncEval
+GUI需求：目前GUI的source viewer功能还用不了，找信号的走向还只依赖于三方工具
+日报：
+      具体事项（提交的DTS\以及描述）
+今日费时问题：如果有请描述、没有则写已汇报"
+"今日分析rule数量：
+分析message 数量：
+提交DTS数量： 
+GUI需求：
+日报：
+回归DTS2025111218745结论为差异，端口例化时未连接，不报告inout未设置，脚本无法处理
+回归DTS2025111224036结论为差异，端口例化时未连接，不报告inout未使用，脚本无法处理
+分析E0329，多报一条，为和顶层无关的module，以前未报告，现在报告，和开发确认应该是问题，小cas未复现
+分析E0339，误报有dts,DTS2025111935111
+修复脚本中一个因tcl crash的问题
+"
+"今日分析rule数量：4
+分析message 数量：37
+提交DTS数量： 0
+GUI需求：
+日报：
+1.回归之前提交的DTS单
+2.和RD确认之前DTS单的问题
+3.分析新增TOP_LGC的E0125,E0329，E0267
+4.分析新增门禁case的E0315
+      具体事项（提交的DTS\以及描述）
+今日费时问题：已汇报"
+"今日分析rule数量：
 分析message 数量：
 提交DTS数量： 
 GUI需求：
 日报：
       具体事项（提交的DTS\以及描述）
 今日费时问题：如果有请描述、没有则写已汇报"
-夏康凯	"今日分析rule数量：
+"今日分析rule数量：
 分析message 数量：
 提交DTS数量： 
 GUI需求：
 日报：
-    解决脚本中E0233的obj有误的问题
-    和柯杰对齐E0320/E0312的检查逻辑, 已完成初版, 待下周框架修改完成后重跑分析数据
-今日费时问题：已汇报"
-刘昌祥	"今日分析rule数量：27
-分析message 数量：340
-提交DTS数量： 
-GUI需求：
-日报：
-    1，分析TOP_LGC 20条rule,其中大部分都是issue未修复；
-    2，分析AO_SUB两条rule，都是issue未修复；
-    3，分析NFI_PYTHYG_TOP 5条rule,其中大部分都是issue未修复；
-    4，协助RD复现问题；
-    5，回归9个DTS，closed 9 DTS;
-今日费时问题：已汇报"
-陈海洋	"今日分析rule数量：
+      具体事项（提交的DTS\以及描述）
+今日费时问题：如果有请描述、没有则写已汇报"
+"今日分析rule数量：
 分析message 数量：
 提交DTS数量： 
 GUI需求：
 日报：
-分析Diff_ca_028/E0125:
-    1. enno报了三个obj, 且带hierarchy信息
-    2. 三方只有一个obj, 且不带hierarchy信息
-    3. 双方obj只有第一个net,且去掉elint的hierarchy信息后才能相关联
-分析NFI的4个rule
-
+      1.统计数据和分配分析任务
+      2.修改统计脚本添加统计待分析、使用diffporoc总数等信息
 今日费时问题：已汇报"
-张凯阳	"今日分析rule数量：7
-分析message 数量：137
+"今日分析rule数量：1
+分析message 数量：18
 提交DTS数量： 1
 GUI需求：
 日报：
-1.标记红区和黄区excel的结果
-2.回归DTS单，closed：1
-3.分析泛化case
-DTS2025112148048：复位信号由ff所在instance更深的层次传入，这种情况应该要报，elint漏报E0236
-      具体事项（提交的DTS\以及描述）
-今日费时问题：标记csv文件，很多都是不需要进行重新标记的，但是待分析状态是yes，每个新版本csv都需要打开重新确认"
-王涵	"今日分析rule数量：
-分析message 数量：
-提交DTS数量： 2
-GUI需求：
-日报：
-尝试写E0236的差异，发现还是得等工具行为确定后再处理：DTS2511210007543
-DTS2511210007559：上层传进来ff的out作为了ff的clk，未报告，在泛化中，三方报告此场景；小case中均未报告
-DTS2511210007543：上层传进来ff的out作为了ff的rst，未报告，在泛化中，三方报告此场景，enno未报;小case中enno报告，三方未报
-今日费时问题：已汇报"
-戢玮淇	"今日分析rule数量：
-分析message 数量：
-提交DTS数量： 
-GUI需求：
-日报：
-      具体事项（提交的DTS\以及描述）
-今日费时问题：如果有请描述、没有则写已汇报"
-齐景烁	"今日分析rule数量：
-分析message 数量：
-提交DTS数量： 
-GUI需求：
-日报：
-      具体事项（提交的DTS\以及描述）
-今日费时问题：如果有请描述、没有则写已汇报"
-殷艺豪	"今日分析rule数量：
-分析message 数量：
-提交DTS数量： 
-GUI需求：
-日报：
-      具体事项（提交的DTS\以及描述）
-今日费时问题：如果有请描述、没有则写已汇报"
-钟鑫冰	"今日分析rule数量：
-分析message 数量：
-提交DTS数量： 
-GUI需求：
-日报：
-      具体事项（提交的DTS\以及描述）
-今日费时问题：如果有请描述、没有则写已汇报"
-莫春豪	"今日分析rule数量：
-分析message 数量：
-提交DTS数量： 
-GUI需求：
-日报：
-      具体事项（提交的DTS\以及描述）
-今日费时问题：如果有请描述、没有则写已汇报"
-陈全鑫	"今日分析rule数量：
-分析message 数量：
-提交DTS数量： 
-GUI需求：
-日报：
-      具体事项（提交的DTS\以及描述）
-今日费时问题：如果有请描述、没有则写已汇报"
-卢东红	"今日分析rule数量：
-分析message 数量：
-提交DTS数量： 
-GUI需求：
-日报：
+1、分析E0307，get_width获取到的变量的信息和和design中的实际信息不符，导致误报E0307,提取的小case无法复现，get_width获取的信息和design中的相同，DTS2025112451310
+2、统计lint arm和x86的性能数据，LIGHTV300的4个case 性能数据arm的比x86的差，其他case的性能数据都是arm的优于x86.debug了一下AO_SUB在arm上runtime比x86差的原因。发现config_message * -max_occurrence -1这个配置会影响read_design和check_lint的时间，这个配置会使read_design从34.077s变成46.903s，check_lint从53.926s变成2m38.891s。把这个配置注释后runtime和x86相近。其他三个case待确定是否也是这个配置导致的。
+3、统计cdc arm和x86的性能数据，从结果看，arm的runtime只有一个case优于x86，其他case的runtime arm的表现比x86的差，arm和x86的数据都是在nile平台上run的，不确定数据是否可靠。使用今天的包在nile平台和本地都跑了一遍，如果明天nile平台上和本地跑的结果都是arm的runtime比x86d的差，说明近期的版本存在arm的runtime比x86差的问题。如果本地的结果是arm的性能优于x86的，说明可能nile平台上arm的资源比x86的少，工具本身没有问题。
       具体事项（提交的DTS\以及描述）
 今日费时问题：如果有请描述、没有则写已汇报"
 
 
-功能情况（4个关键case）：
+
+功能情况（4个关键case）：（都没有包含位宽的rule）
   18XXE-TXXX：
       pass的rule: 72/118
-      漏报误报率：  3.98% 5.13% > 2.8% 2.6% > 3.69% 1.42% > 1.41% 3.58%
-      DTS:58>62 > 58 > 50 > 51 > 55 > 54> 52 
-      剩余待分析msg：8
+      漏报误报率：  1.34% 3.5%
+      DTS：1
+      剩余待分析msg：532
   LXXX-AOXXX：
-      pass的rule:  56/89
+      pass的rule:  58/89
       漏报误报率： 4.71% 6.46%
-      DTS:41->51 -> 45 -> 42 -> 40
+      DTS：40
       需要分析的message：18
   18XX-NFIXX：
-       pass的rule: 37/87
-      漏报误报率： 2.78% 4.0%
-      DTS:36
-      需要分析的message：1112
+       pass的rule: 41/87
+      漏报误报率： 2.54% 3.84%
+      DTS：45
+      需要分析的message：75
 
   1813-FE_XXX
       pass的rule: 30/87
-      漏报误报率： 9.94% 8.65% > 8.6% 9.99%
-      DTS: 9
-      需要分析的message：18246
+      漏报误报率：8.68% 9.97%
+      DTS: 12
+      需要分析的message：3622
