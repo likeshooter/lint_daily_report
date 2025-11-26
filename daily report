@@ -1,58 +1,56 @@
-马杰	"今日分析rule数量：2
-分析message 数量：32
-提交DTS数量：2 
+马杰	"今日分析rule数量：3
+分析message 数量：57
+提交DTS数量：4
 日报：
-    1,验证回归9个DTS,7个非问题，2个问题解决
-    2，分析FE_TSS HDL_1102(1/1):已知问题DTS2025111917180
-    3，分析NFI_PYHYG_TOP E0220(31/71):发现2个问题，1个差异
-        DTS2025112466592:对于[0:0] A工具不认为是数组，lint会认为是数组导致误报
-        DTS2025112440007:点击design_tree的instance，右键open in source进入实际代码，右键信号选择copy(Hier name) 获取的值是固定为最后一次的instance路径，与前面选择的路径不一致
+    1,分析NFI E0220剩余(54/54),
+        DTS2025112511484:多次instance例化并传入不同参数时，lint漏报一些情况(缩小case正常报，未复现，涉及define控制的分支选择，lint无法确定走到哪个分支，)
+    2,分析FE_TSS HDL_2805(1/1),E0338(2/2):发现3个问题
+        DTS2025112523978(1):对于parameter端口定义出的{0{xxx}},A工具不检查，lint检查导致误报
+        DTS2025112530019(1):当port位宽由function返回值控制时，在如下例子中，lint误报
+        DTS2025112531999(1):例化端口连接for循环变量，lint认为未完全连接
 今日费时问题：
-    1,在violation tree里面只能搜索instance名，不能包含hierarchy,存在多次例化时就不能直接找到对应instance，希望能有方法通过hierarchy准确定位到唯一instance"
+    1,由`ifdef控制的分支，A工具会通过不同颜色标记来提示代码走了哪个分支，lint无此功能，需要手动去搜索是否定义了相关define,比较浪费时间"
 夏康凯	"今日分析rule数量：
 分析message 数量：
 提交DTS数量： 
 GUI需求：
 日报：
-      调试driveload脚本，分析E0320和E0321的数据，发现E0321和sg报的net的位置不一样(我们报在undriven的位置, sg报的位置存在随机)，已通过脚本处理
+      调试driveload脚本: E0320误报的msg完成适配，漏报的msg还需分析后处理；E0321误报的msg数量也有收敛
 今日费时问题：已汇报"
-刘昌祥	"今日分析rule数量：11
-分析message 数量：1176
-提交DTS数量： 3
+刘昌祥	"今日分析rule数量：8
+分析message 数量：258
+提交DTS数量： 4
 GUI需求：
 日报：
-    1，分析NFI_PYHYG_TOP 9条rule,大部分都是issue还未修复的；
-    2，分析TOP_LGC和FE_TSS两条rule都是issue未修复的；
-DTS2025112470182：check_lint -filter {@enno_id==""E0339""} 这里的enno_id写错，没有提示；把@enno_id写成@enn_id，@enni_id,@enno等这些错误形式，不会报任何提示，会正常走check_lint，但是不会检查rule，容易造成误判没报这条rule；
-DTS2025112410523:elint的hierarchy没有从顶层开始报;
-DTS2025112408406:给时钟信号赋值的位置在例化的位置，elint报一条，A报两条；
-今日费时问题：上午我的sg工具存在一直很卡的情况，导致复现case的时候每次都要跑五分钟以上（小case）,下午没卡了；"
+   1,分析了门禁4条rule,泛化4条rule;
+   2,协助RD复现问题；
+   3，协助艺豪改了位宽脚本的一个bug;
+DTS2025112527215:根据get_width这个命令得到例化是连接的位宽都是14 bit，不存在位宽不匹配；（小case未复现）
+DTS2025112522944:Violation Diff显示有问题 1，启动工具 2，打开GUI 3，read_design -sysv file -top TOP 4，check_lint 5,点击Violation Diff (发现Violation Diff 是空的) 6，再次check_lint(Violation Diff 有内容了rule)
+DTS2025112509452:load_session之后check E0035会发现crash 1,23号的包启动根据； 2，load_sesion Gen02-m006的session 3,start_gui 4,check_lint -filter {@enno_id==""E0035""} 发生crash
+DTS2025112508078:代码未复现，但是根据电路图来看不应该报E0364；open in incremental schematic打开的电路
+今日费时问题：已汇报"
 陈海洋	"今日分析rule数量：
 分析message 数量：
 提交DTS数量： 
 GUI需求：
 日报：
-回归1个dts
-修复obj转换的问题涉及E0239, 
-添加统计rule脚本, 指定排除存在dts单/差异的msg
-
+修复s_to_e_obj带多层花括号报错的问题
+优化修复s_to_e_obj传进来的obj的bus带逗号时转成多个obj的问题
+补充差异ppt
 今日费时问题：已汇报"
-张凯阳	"今日分析rule数量：10
-分析message 数量：641
-提交DTS数量：5
+张凯阳	"今日分析rule数量：7
+分析message 数量：809
+提交DTS数量：4 
+GUI需求：
 日报：
-1.回归DTS单，closed：1
-2.和谢天讨论泛化2个未复现issue并找到问题
-3.分析门禁和泛化case
-DTS2025112401928：parameter多次重定向，elint漏报E0251
-DTS2025112433131：对于index含参数的非压缩数组，参数重定义，elint报的msg有时是重复且看起来没必要的
-DTS2025112447249：嵌套if case语句出现多次赋值，elint漏报（嵌套的if、for、case均可能出现漏报场景，改的时候建议都看下这几种情况的逻辑）
-DTS2025112459646：always块变量动态位选在if else分支，if分支的动态位选变量是for循环下的integer i，无论i的取值范围限制在赋值变量的range内还是外，elint都误报E0146，分析认为：
-1.if分支的动态位选变量限制在赋值变量的range内，此时和else分支的动态位选变量是小于或等于的关系，这种情况可能出现index变量位宽相等、不等，值相等、不等几种情况，可能会导致出现违例情景（类似DTS2025110802865）
-2.if分支的动态位选变量的range大于赋值变量的range，此时出现位宽越界的情况，A报SYNTH_5255综合错误，elint仍然报E0146，综合认为这种情况也不应该报
-ky_1124_01：综合出来是自己load自己且没有穿过其他器件，应该不能算load，elint漏报，object：RandSyncEval
-GUI需求：目前GUI的source viewer功能还用不了，找信号的走向还只依赖于三方工具
-日报：
+回归DTS单：closed：1
+DTS2025112507422：read_design -> check_lint -> start_gui -> gui exit -> read_design -> check_lint -> start_gui
+现象：gui左侧视图project栏只剩project一个，violation tree等视图不显示
+DTS2025112525568：function的input信号违例，elint漏报2条E0085
+DTS2025112530767：always块有if else分支时，elint有时报if分支有时报else分支，A统一报if分支
+DTS2025112536467：read_design -> check_lint -> select message_ID(FFNoAsyncRS) -> 右键message open in source
+现象：message报在20行，返回在第九行（注释行）
       具体事项（提交的DTS\以及描述）
 今日费时问题：如果有请描述、没有则写已汇报"
 王涵	"今日分析rule数量：
@@ -60,21 +58,22 @@ GUI需求：目前GUI的source viewer功能还用不了，找信号的走向还�
 提交DTS数量： 
 GUI需求：
 日报：
-回归DTS2025111218745结论为差异，端口例化时未连接，不报告inout未设置，脚本无法处理
-回归DTS2025111224036结论为差异，端口例化时未连接，不报告inout未使用，脚本无法处理
-分析E0329，多报一条，为和顶层无关的module，以前未报告，现在报告，和开发确认应该是问题，小cas未复现
-分析E0339，误报有dts,DTS2025111935111
-修复脚本中一个因tcl crash的问题
-"
-戢玮淇	"今日分析rule数量：4
-分析message 数量：37
-提交DTS数量： 0
+1.E0026：和开发确认，只检查顶层的inout,已修改差异proc,现均已标记
+2.E0329：待开发给个分支包，看层级，确实是否是rule的问题
+3.补充完成的差异的差异ppt（diff_ca_018,diff_ca_020,diff_ca022，Diff_ca_017）
+4.修复一个脚本数据丢失的问题
+今日费时问题：已汇报"
+戢玮淇	"今日分析rule数量：3
+分析message 数量：13
+提交DTS数量： 4
 GUI需求：
 日报：
-1.回归之前提交的DTS单
-2.和RD确认之前DTS单的问题
-3.分析新增TOP_LGC的E0125,E0329，E0267
-4.分析新增门禁case的E0315
+1.回归之前的DTS单
+2.分析FE_TSS的E0057,E0059,E0071，正在分析E0205
+DTS2025112530328：常数d'07等因为含有0导致误报
+DTS2025112525754：例化传参使reg型为单比特时无法识别出来导致漏报
+DTS2025112512114：通过get_width得到parameter的值异常
+DTS2025112509644：GUI界面最小化以后，Windows一栏勾选的各种tree会被初始化
       具体事项（提交的DTS\以及描述）
 今日费时问题：已汇报"
 齐景烁	"今日分析rule数量：
@@ -96,40 +95,61 @@ GUI需求：
 提交DTS数量： 
 GUI需求：
 日报：
-      1.统计数据和分配分析任务
-      2.修改统计脚本添加统计待分析、使用diffporoc总数等信息
-今日费时问题：已汇报"
-莫春豪	"今日分析rule数量：1
-分析message 数量：18
-提交DTS数量： 1
+      1.统计新版本数据并分配分析任务
+      2.发现脚本出现报错
+今日费时问题：如果有请描述、没有则写已汇报"
+莫春豪	"今日分析rule数量：
+分析message 数量：
+提交DTS数量： 
 GUI需求：
 日报：
-1、分析E0307，get_width获取到的变量的信息和和design中的实际信息不符，导致误报E0307,提取的小case无法复现，get_width获取的信息和design中的相同，DTS2025112451310
-2、统计lint arm和x86的性能数据，LIGHTV300的4个case 性能数据arm的比x86的差，其他case的性能数据都是arm的优于x86.debug了一下AO_SUB在arm上runtime比x86差的原因。发现config_message * -max_occurrence -1这个配置会影响read_design和check_lint的时间，这个配置会使read_design从34.077s变成46.903s，check_lint从53.926s变成2m38.891s。把这个配置注释后runtime和x86相近。其他三个case待确定是否也是这个配置导致的。
-3、统计cdc arm和x86的性能数据，从结果看，arm的runtime只有一个case优于x86，其他case的runtime arm的表现比x86的差，arm和x86的数据都是在nile平台上run的，不确定数据是否可靠。使用今天的包在nile平台和本地都跑了一遍，如果明天nile平台上和本地跑的结果都是arm的runtime比x86d的差，说明近期的版本存在arm的runtime比x86差的问题。如果本地的结果是arm的性能优于x86的，说明可能nile平台上arm的资源比x86的少，工具本身没有问题。
       具体事项（提交的DTS\以及描述）
 今日费时问题：如果有请描述、没有则写已汇报"
+陈全鑫	"今日分析rule数量：2
+分析message 数量：22
+提交DTS数量： 2
+GUI需求：
+日报：
+    1、分析E0065：
+      1.1、sg bug一条：在枚举中使用了x，报了该问题。
+      1.2、工具误报8条，已提dts单。
+    2、分析E0070：
+      1.1、sg bug 4条：例如i1/8 这种表达式sg不报（i1是整数型）
+      1.2、同DTS2025111233979
+      1.3、c & ~(1'b1 << d * 3)表达式，我们工具没有报该问题（已提dts单）
+今日费时问题：已汇报"
+卢东红	"今日分析rule数量：2
+分析message 数量：39
+提交DTS数量： 1
+GUI需求：
+日报：分析FE_TSS的E0180,E0157；正在分析E0186
+      1. E0157：diff_b；case语句没有表达完整，sg没有报。可能是因为条件语句没有使用
+2. E0180（DTS2025112535570）误报1条，实例化时，传递了参数值，该值没有超过限定值。不应该报循环迭代次数超过限定值。
+今日费时问题：如果有请描述、没有则写已汇报"
+
+
+
 
 
 功能情况（4个关键case）：（都没有包含位宽的rule）
   18XXE-TXXX：
       pass的rule: 72/118
-      漏报误报率：  1.34% 3.5%
-      DTS：1
-      剩余待分析msg：532
+      漏报误报率：  1.34% 3.5% -> 1.20% 2.08%
+      DTS：45
+      剩余待分析msg：0
   LXXX-AOXXX：
       pass的rule:  58/89
-      漏报误报率： 4.71% 6.46%
-      DTS：40
-      需要分析的message：18
+      漏报误报率： 4.71% 6.46% -> 4.58% 6.65%
+      DTS：34
+      需要分析的message：0
   18XX-NFIXX：
        pass的rule: 41/87
-      漏报误报率： 2.54% 3.84%
-      DTS：45
-      需要分析的message：75
+      漏报误报率： 2.54% 3.84% -> 2.44% 3.27%
+      DTS：38
+      需要分析的message：57
 
   1813-FE_XXX
       pass的rule: 30/87
-      漏报误报率：8.68% 9.97%
-      DTS: 12
-      需要分析的message：3622
+      漏报误报率：8.68% 9.97% -> 7.77% 6.43%
+      DTS: 17
+      需要分析的message：1691
