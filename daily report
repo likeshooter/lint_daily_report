@@ -1,87 +1,278 @@
-马杰	"今日分析rule数量：
-分析message 数量：
-提交DTS数量： 
-GUI需求：
-日报：
-      具体事项（提交的DTS\以及描述）
-今日费时问题：如果有请描述、没有则写已汇报"
-夏康凯	"今日分析rule数量：
-分析message 数量：
-提交DTS数量： 
-GUI需求：
-日报：
-1. 分析自建case, 发现E0212的一个问题: task内的""empty else"" sg报, elint不报
-2. 回传自建case 79个
-今日费时问题：已汇报"
-刘昌祥	"今日分析rule数量：
-分析message 数量：
-提交DTS数量： 1
-GUI需求：
-日报：
-     1,分析修改selfcase 6个；
-     2，复现未缩减的dts发现一个load_session的问题（已提单）；
-     3，跑一个改动的包，分析这个改动影响一条rule（变差），已反馈；
-     4，回传B5 case：40；
-DTS2025122621304：不是使用不是生成session的包打开session，否则容易出错；
-今日费时问题：已汇报"
-张凯阳	"今日分析rule数量：
-分析message 数量：
-提交DTS数量： 
-GUI需求：
-日报：
-1.分析重构自测case，6个case
-2.回传B5case：80
-3.回归DTS：4个
-今日费时问题：如果有请描述、没有则写已汇报"
-王涵	"今日分析rule数量：
-分析message 数量：
-提交DTS数量： 
-GUI需求：
-日报：
-1.回传B5case 79个
-2.分析重构自测case2个
-3.修改脚本中一个报错
-今日费时问题：已汇报"
-戢玮淇	"今日分析rule数量：
-分析message 数量：
-提交DTS数量： 
-GUI需求：
-日报：
-      具体事项（提交的DTS\以及描述）
-今日费时问题：如果有请描述、没有则写已汇报"
-齐景烁	"今日分析rule数量：
-分析message 数量：
-提交DTS数量： 
-GUI需求：
-日报：
-      具体事项（提交的DTS\以及描述）
-今日费时问题：如果有请描述、没有则写已汇报"
-殷艺豪	"今日分析rule数量：
-分析message 数量：
-提交DTS数量： 
-GUI需求：
-日报：
-      具体事项（提交的DTS\以及描述）
-今日费时问题：如果有请描述、没有则写已汇报"
-钟鑫冰	"今日分析rule数量：
-分析message 数量：
-提交DTS数量： 
-GUI需求：
-日报：
-      1.给CA提供需要的文件
-      2.执行和分析跑根据新包跑出来是的数据
-今日费时问题：已汇报"
-莫春豪	"今日分析rule数量：
-分析message 数量：
-提交DTS数量： 
-GUI需求：
-日报：
-      具体事项（提交的DTS\以及描述）
-今日费时问题：如果有请描述、没有则写已汇报"
-左万林	"今日分析rule数量：
-分析message 数量：
-提交DTS数量： 
-GUI需求：
-日报：
-      具体事项（提交的DTS\以及描述）
-今日费时问题：如果有请描述、没有则写已汇报"
+collect.tcl
+##################################################################################################
+## 过程名称：extract_statistics_info
+## 过程功能：从failMessage 中获取需要统计的数据
+## 入口参数：
+##          case: case 路径
+## 出口参数：无
+## 其他说明：无
+## 使用样例：无
+##################################################################################################
+proc extract_statistics_info {case} {
+    set widths [list "E0023" "E0265" "E0267" "E0268" "E0269" "E0270" "E0271" "E0272" "E0273" "E0276" "E0281" "E0291" "E0292" "E0293" "E0294" "E0295" "E0296" "E0297"]
+    set summarytcl [::userCommon::getAllFiles $case/info -name "summary.tcl"]
+    
+    if {$summarytcl == ""} {
+    FAULT "no find summary.tcl in the $case"
+    return
+    } else {
+    source $summarytcl
+    }
+    # elint 总数，三方总数， 纯误报总数， 纯漏报总数， 行号不匹配总数， obj 不匹配总数， 路径不匹配总数
+    set EReportTotal 0; set AReportTotal 0;set onlyEReportTotal 0; set onlyReportTotal 0;set lineUnmatchTotal 0; set objectUnmatchTotal 0;set designUnmatchTotal 0
+    # 总误报数，总漏报数，脚本处理总数，人工分析总数， DTS 总数，新增总数，
+    set falseTotal 0;set missTotal 0;set scriptDiffTotal 0; set markDiffTotal 0;set dtsTotal 0;set newtotal 0
+    # DTS 涉及的msg数，DTS 涉及的msg数的总数，带分析总数，位宽
+    set dtsMsg 0;set dtsMsgTotal 0;set needAnaTotal 0;set widthTotal 0
+    # pass 的rule总数，覆盖的rule总数
+    set passRule 0;set overwrite 0
+    set line [list "enmold lint report 3pt report'only E report'only E report'only A report'only A report rate'only A report rate'line unmatch`object unmatch`design unmatch'total false'total miss'total false rate'script diff`mark diff`dts num`dts-msg num`add"]
+    # 脚本diff proc列表； pass的Rule列表；需要分析的rule的列表；位宽的数量
+    set scriptDiffRule [list]; set passrules [list];set needAnas [list];set width [list]
+    
+    set falseDts [list]; # 记录误报的dts的列表
+    set missDts [list]; # 记录漏报的dts的列表
+    settoBeAnalyzes [list]; # 带分析的
+    set bitWidths [list];# 位宽中的需要分析
+    set dtsLists [list]
+      
+    dict for {key value} $::compare::rulemap {
+        set flag 0
+        # lint 报的总数
+        if {[catch {dict get $summary $key "BReport"} BReport] != 0} {set BReport 0}
+        # 误报总数
+        set EReportTotal [expr $EReportTotal + $BReport]
+        # 三方总数
+        if {[catch {dict get $summary $key "AReport"} AReport] != 0} {set AReport 0}
+        # 漏报总数
+        set AReportTotal [expr $AReportTotal + $AReport]
+        if {[expr $AReport + $BReport] > 0} {
+            set flag 1
+            # 覆盖的rule总数
+            set overwrite [expr $overwrite + 1]
+        }
+
+        # 获取需要的数据
+        set failData [deal_fail_data $key]
+        # 纯漏报
+        get_data $failData "missReport" OnlyAReport onlyAReportTotal
+        # 纯误报
+        get_data $failData "falseReport" OnlyBReport onlyEReportTotal
+        # puts $OnlyBReport
+        # object 不匹配
+        get_data $failData "objectUnmatch" objectUnmatch objectUnmatchTotal
+        # 行号不匹配
+        get_data $failData "lineNumUnmatch" lineNumUnmatch lineUnmatchTotal
+        # design path 不匹配
+        get_data $failData "designPathUnmatch" designPathUnmatch designUnmatchTotal
+        # 脚本 diff proc 数量
+        get_data $failData "scriptDiff" scriptDiff scriptDiffTotal
+        if {$scriptDiff > 0} {lappend scriptDiffRule [list $key $scriptDiff]}
+        # 人工分析的数量
+        get_data $failData "markDiff" markDiff markDiffTotal
+        # 总的误报漏报数量
+        set false [expr $OnlyBReport + ($objectUnmatch + $lineNumUnmatch + $designPathUnmatch)/2]
+        set falseTotal [expr $falseTotal + $false]
+        set miss [expr $OnlyAReport + ($objectUnmatch + $lineNumUnmatch + $designPathUnmatch)/2]
+        set missTotal [expr $missTotal + $miss]
+        set falseRate [calculated_rate $false $BReport]
+        set missRate [calculated_rate $miss $AReport]
+        #, 门禁pass的rule数，误报漏报率都是0 %
+        if {$::compare::caseType == "B4" && $flag == 1 && [string trimright $falseRate "%"] == "0" && [string trimright $missRate "%"] == "0"} {set passRule [expr $passRule + 1]; lappend passrules [list $key $falseRate $missRate]}
+        # 纯误报漏报
+        set OnlyBReportRate [calculated_rate $OnlyBReport $BReport]
+        set OnlyAReportRate [calculated_rate $OnlyAReport $AReport]
+        # 泛化的pass的rule数，误报：2%漏报0%
+        if {$::compare::caseType != "B4" && $flag == 1 && [string trimright $OnlyBReportRate "%"] <= "2" && [string trimright $OnlyAReportRate "%"] == "0"} {set passRule [expr $passRule + 1]; lappend passrules [list $key $OnlyBReportRate $OnlyAReportRate]}
+        # 记录新增加的msg
+        set new 0
+        set addMessages [dict get $failData "new"]
+        dict for {errorType value} $addMessages {
+            if {$::compare::caseType != "B4" && [regexp {objectUnmatch|lineNumUnmatch|designPathUnmatch} $errorType] ==1} {
+                continue
+            }
+            set new [expr $new + $value]
+        }
+        set newtotal [expr $newtotal + $new]
+        # 记录需要分析的msg
+        set toBeAnalyze [dict get $failData "toBeAnalyze"]
+        set toBeAnalyzeNumber 0
+        set falseandmiss ""
+        dict for {errorType value} $toBeAnalyze {
+            if {$::compare::caseType != "B4" && [regexp {objectUnmatch|lineNumUnmatch|designPathUnmatch} $errorType] ==1} {
+                continue
+            }
+            if {$::compare::caseType == "" && [regexp {falseReport|missReport} $errorType] ==1 && $value > 0} {
+                lappend falseandmiss "$key $errorType $value"
+            }
+            set toBeAnalyzeNumber [expr $toBeAnalyzeNumber + $value]
+        }
+        if {$falseandmiss != ""} {
+            puts $falseandmiss
+        }
+        if {$::compare::caseType != "B4"} {
+            # puts 111
+            if {[llength $widths]} {
+                lappend bitWidths "$key`$toBeAnalyzeNumber`[expr $OnlyBReport + $OnlyAReport]"
+            } elseif {$toBeAnalyzeNumber > 0} {
+                lappend toBeAnalyzes "$key`$toBeAnalyzeNumber`[expr $OnlyBReport + $OnlyAReport]"
+            }
+        } else {
+            if {$toBeAnalyzeNumber > 0} {
+                lappend toBeAnalyzes "$key`$toBeAnalyzeNumber`[expr $OnlyBReport + $OnlyAReport + $objectUnmatch + $lineNumUnmatch + $designPathUnmatch]"
+            }
+        }
+        # DTS
+        set dtsList [list]
+        set dtsDict [dict get $failData "DTS"]
+        set msgid [join [lindex [dict get :::userCommon::rulemap $key] 0] "_"]
+        set dts 0
+        set dtsMsg 0
+        dict for {errorType value} $dtsDict {
+                set dtsMessageNumber [llength $value]
+                set dtss [lsort -unique $value]
+                set dtsNumber [llength $dtss]
+                if {$::compare::caseType != "B4" && [llength $dtss] > 0 && [regexp {falseReport|missReport} $errorType] == 1} {
+                set dtsslist [concat $dtsList $dtss]
+                if {$errorType == "falseReport"} {
+                    lappend falseDts "$key`$msgid`$OnlyBReport`$OnlyBReportRate`$dtsMessageNumber`$dtsNumber`$dtsList"
+                } elseif {$errorType == "missReport"} {
+                    lappend missDts "$key`$msgid`$OnlyAReport`$OnlyAReportRate`$dtsMessageNumber`$dtsNumber`$dtsList"
+                }
+                }
+                set dts [expr $dts + $dtsNumber]
+                set dtsTotal [expr $dtsTotal + $dtsNumber]
+                set dtsMsgTotal [expr $dtsMsgTotal + $dtsMessageNumber]
+                set dtsMsg [expr $dtsMsg + $dtsMessageNumber]
+        }
+        if {[llength $dtsList] > 0} {lappend dtsLists "key`[join $dtsList " "]"}
+
+        lappend line '$key`$BReport`$AReport`$OnlyBReport`$OnlyAReport`$OnlyBReportRate`$OnlyAReportRate`$lineNumUnmatch`$objectUnmatch`$designPathUnmatch`$false`$falseRate`$missRate`$scriptDiff`$markDiff`$dts`$dtsMsg`$new'
+    }
+    set OnlyBReportTotalRate [calculated_rate $onlyBReportTotal $EReportTotal]
+    set OnlyAReportTotalRate [calculated_rate $onlyAReportTotal $AReportTotal]
+    
+    set falseTotalRate [calculated_rate $falseTotal $EReportTotal]
+    set missTotalRate [calculated_rate $missTotal $AReportTotal]
+    
+    lappend line "total`$EReportTotal`$AReportTotal`$onlyEReportTotal`$OnlyBReportTotalRate`$OnlyAReportTotalRate`$lineUnmatchTotal`$objectUnmatchTotal`$designUnmatchTotal`$falseTotal`$missTotal`$falseTotalRate`$missTotalRate`$scriptDiffTotal`$markDiffTotal`$dtsTotal`$dtsMsgTotal`$newtotal"
+    
+    ::userCommon::writeFile [file join $::userCommon::current "summary.csv"] "[join $line "\n"]"
+    ::userCommon::appendToFile [file join $::userCommon::current "summary.csv"] "pass rule`$passRule"
+    ::userCommon::appendToFile [file join $::userCommon::current "summary.csv"] "overwrite`$overwrite"
+    ::userCommon::writeFile [file join $::userCommon::current "script_diff_rule.txt"] "enmoid num"
+    ::userCommon::appendToFile [file join $::userCommon::current "script_diff_rule.txt"] "[join [lsort -unique $scriptDiffRule] "\n]"
+    ::userCommon::writeFile [file join $::userCommon::current "pass_rule.txt"] "enmoid false miss"
+    ::userCommon::appendToFile [file join $::userCommon::current "pass_rule.txt"] "[join $passRules "\n]"
+    ::userCommon::writeFile [file join $::userCommon::current "to_be_analysis.csv"] "enmoid toBeAnalysis total\n[join $toBeAnalyzes "\n]"
+    ::userCommon::writeFile [file join $::userCommon::current "width.csv"] "enmoid toBeAnalysis total\n[join $toBeWidths "\n]"
+    ::userCommon::writeFile [file join $::userCommon::current "dts.csv"] "enmoid dts\n[join $dtsLists "\n]"
+    ::userCommon::writeFile [file join $::userCommon::current "falseDts.csv"] "enmoid msg id`false rate`dts_msg_num`dts num`dts\n[join $falseDts "\n]"
+    ::userCommon::writeFile [file join $::userCommon::current "missDts.csv"] "enmoid msg id`miss`miss rate`dts_msg_num`dts num`dts\n[join $missDts "\n"]"
+
+}
+
+#############################################################################################################
+## 过程名称：get_data
+## 过程功能：从字典中共获取数据
+## 入口参数：
+##          failData: 字典
+##          type:字典的key
+##          num: 获取的num
+##          totalNum : 获取的总num
+## 出口参数：无
+## 其他说明：无
+## 使用样例：无
+#############################################################################################################
+proc get_data {failData type num totalNum} {
+    upvar 1 $num number
+    upvar 1 $totalNum total
+    set number 0
+    set number [dict get $failData "$type"]
+    set total [expr $total + $number]
+}
+#############################################################################################################
+## 过程名称：get_data
+## 过程功能：从字典中共获取数据
+## 入口参数：
+##          failData: 字典
+##          type:字典的key
+##          num: 获取的num
+##          totalNum : 获取的总num
+## 出口参数：无
+## 其他说明：无
+## 使用样例：无
+#############################################################################################################
+proc deal_fail_data {enoId} {
+    catch {dict get $::compare::failMessage $enoId} failMessage option
+
+    set fail [dict create missReport 0 falseReport 0 objectUnmatch 0 lineNumUnmatch 0 designPathUnmatch 0 scriptDiff 0 markDiff 0 new [dict create missReport 0 falseReport 0 objectUnmatch 0 lineNumUnmatch 0 designPathUnmatch 0] toBeAnalyze [dict create missReport 0 falseReport 0 objectUnmatch 0 lineNumUnmatch 0 designPathUnmatch 0] DTS [dict create missReport [list] falseReport [list] objectUnmatch [list] lineNumUnmatch [list] designPathUnmatch [list]]]
+    # DTS 是一个 字典，保存的DTS、漏洞的DTS_obj的、line的
+    if {[lindex option 1] == 1} {
+        return $fail
+    }
+    set dtss [list]
+    set scriptDiffRule [list]
+    dict for {key value} $failMessage {
+        dict for {errorType fails} $value {
+            if {$errorType == "Fail"} {continue}
+            foreach item $fails {
+                if {$errorType == "Pass"} {
+                    if {[lindex $item 9] != ""} {
+                        append scriptDiffRule $key
+                        dict set fail "scriptDiff" [expr 1 + [dict get $fail "scriptDiff"]]
+                    }
+                } else {
+                    # 第10 是 1 或者 7 ;第 11 是 diff or DTS
+                    if {[lindex $item 10] == 1} {
+                        set dtss [dict get $fail "DTS" "ErrorType"]
+                        set dtss [concat $dtss [split [lindex $item 11] "\n;"]]
+                        dict set fail "DTS" $errorType $dtss
+                        dict set fail $errorType [expr [dict get $fail $errorType] + 1]
+                    } elseif {[lindex $item 10] == 7} {
+                        # 人为标记的diff 是算作 pass 的
+                        dict set fail "markDiff" [expr 1 + [dict get $fail "markDiff"]]
+                    } else {
+                        dict set fail $errorType [expr 1 + [dict get $fail "$errorType"]]
+                    }
+                    # 统计新增的msg
+                    if {[lindex $item 9] == "new" && [lindex $item 10] == "" && [lindex $item 11] == ""} {
+                        dict set fail "new" $errorType [expr 1 + [dict get $fail "new" "ErrorType"]]
+                    }
+                    # 统计需要分析的 msg
+                    if {[lindex $item 10] == "" || [lindex $item 11] == ""} {
+                        dict set fail "toBeAnalyze" $errorType [expr 1 + [dict get $fail "toBeAnalyze" $errorType]]
+                    }
+                    if {[lindex $item 9] != "" && [lindex $item 9] != "new"} {
+
+                    }
+                }
+            }
+        }
+    }
+    return $fail
+}
+
+##################################################################################################
+## 过程名称: completed_case_path
+## 过程功能: 获取路进攻in
+## 入口参数:
+##          name: case名字
+## 出口参数: 无
+## 其他说明: 无
+## 使用样例: 无
+##################################################################################################
+proc completed_case_path {name} {
+
+    foreach case $::compare::filelist {
+
+        if {[file exists [file join $case $name]] == 1} {
+            return [file join $case $name]
+        }
+    }
+    return 0
+}
+
+
+
+
