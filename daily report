@@ -273,6 +273,341 @@ proc completed_case_path {name} {
     return 0
 }
 
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+                                                                                                            分割线
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+inheritance.tcl
+
+##################################################################
+## 过程名称：inheritance_main
+## 过程功能：继承的主函数
+## 入口参数：无
+## 出口参数：无
+## 其他说明：无
+## 使用样例：无
+##################################################################
+proc inheritance_main {arg} {
+    upvar 1 $arg argv
+    set old [dict create]
+    set new [dict create]
+    dict for {enmoid names} $::compare::rulemap {
+        INFO "enmoid: $enmoid"
+        # old ; 读取total.csv和pass.csv中的信息
+        set oldCsvFile [::userCommon::getAllFiles [file join $argv(old) "objNotMatch"] -type f -name "${enmoid}*.csv"]
+        extract_total_and_pass_csv $oldCsvFile failMessage
+        if {[info exists failMessage] == 1} {dict set old $enmoid $failMessage}
+        # new ; 读取total.csv和pass.csv中的信息
+        set newCsvFile [::userCommon::getAllFiles [file join $argv(new) "objNotMatch"] -type f -name "${enmoid}*.csv"]
+        extract_total_and_pass_csv $newCsvFile failMessage
+        if {[info exists failMessage] == 1} {dict set new $enmoid $failMessage}
+    }
+
+    NOTICE "merge"
+    # 由于 统计数据的当时不一样所以需要增加
+    if {[string match {*lint_rtl_B4*} $argv(new)] == 1 || [string match {*b4*} $argv(new)] == 1 || [string match {*/selfCase} $argv(new)] == 1} {
+        set ::compare::caseType "B4"
+    } else {
+        set ::compare::caseType ""
+    }
+    NOTICE "case: $::compare::caseType"
+    # 开始继承
+    compare_last_and_latest_messages $new $old
+    # 统计数据
+    # extract_statistics_info [file join $argv(new) "objNotMatch"]
+    extract_statistics_info $argv(new)
+
+    NOTICE "Check enmoid map csv"
+    check_fail [dict keys $old]
+    NOTICE "Check enmoid map csv"
+    check_fail [dict keys $new]
+}
+##################################################################
+## 过程名称: extract_total_and_pass_csv
+## 过程功能: 读取 total 和 pass csv
+## 入口参数:
+##          csvs: csv 的列表
+##          fail: 返回的读取的信息；格式与compare::failMessage中的 value 一样
+## 出口参数: 无
+## 其他说明: 无
+## 使用样例: 无
+##################################################################
+proc extract_total_and_pass_csv {csvs fail} {
+    upvar 1 $fail failMessage
+    set failMessage [dict create]
+    foreach csv $csvs {
+        # 获取 totalcsv 中的信息
+        if {[regexp {.*\(EIHDL_VDB_\)\d{4}\)_total.csv} $csv] == 1} {
+            INFO "total csv: $csv"
+            extract_total_csv $csv failMessage
+        }
+        # 获取 passcsv 中的信息
+        if {[regexp {.*\(EIHDL_VDB_\)\d{4}_pass.csv} $csv] == 1} {
+            INFO "pass csv: $csv"
+            extract_pass_csv $csv failMessage
+        }
+    }
+}
+#########################################################################
+## 过程名称: extract_total_csv
+## 过程功能: 读取 total csv
+## 入口参数:
+##          csv: csv
+##          fail: 返回的读取的信息；格式与compare::failMessage中的 value 一样
+## 出口参数: 无
+## 其他说明: 无
+## 使用样例: 无
+#########################################################################
+proc extract_total_csv {csv_fail {flag 0}} {
+    upvar 1 $fail failMessages
+    # 获取 total.csv 内容
+    set contents [split [::userCommon::readFile $csv] "\n"]
+    set casename ""; # 记录 case 路径
+    set errorType ""; # 记录错误类型
+    foreach line $contents {
+        if {$line == ""} {continue}
+        if {[string match {tool`Amessageid`rule`ennomessageid*} $line] == 1} {continue}
+        # 以 ` 分割 这行
+        set lines [split $line `]
+        set firstItem [lindex $lines 0]
+        if {$firstItem == ""} {continue}
+        # 查看是否是 case 路径
+        if {[file exists $firstItem] == 1 || [string match "/home/jenkins*" $firstItem] == 1 || [completed_case_path $firstItem] != 0} {
+            if {$flag == 0} {
+                set casename [file tail $firstItem]
+            } else {
+                set casename $firstItem
+            }
+            dict set failMessages $casename [dict create falseReport {} missReport {} lineNumUnmatch {} objectUnmatch {} pass {} fail {}]
+            continue
+        }
+        # 检查错误类型
+        if {[regexp {falseReport|missReport|lineNumUnmatch|objectUnmatch} $firstItem] == 1} {
+            set errorType $firstItem
+            continue
+        }
+        # 判断是否是误报还是漏报、或者差异
+        if {$casename != "" && $errorType != ""} {
+            # 保存信息
+            if {[catch {dict get $failMessages $casename $errorType} value] == 0} {
+                lappend value $lines
+                dict set failMessages $casename $errorType $value
+            } else {
+                dict set failMessages $casename $errorType [list $lines]
+            }
+        }
+    }
+}
+##################################################################
+## 过程名称： extract_pass_csv
+## 过程功能：读取 pass csv
+## 入口参数：
+##         csv: csv
+##         passMessage: 返回的读取的信息；格式与 compare::failMessage 中的 value 一样
+## 出口参数：无
+## 其他说明：无
+## 使用样例：无
+##################################################################
+proc extract_pass_csv {csv passMessage {flag 0}} {
+    upvar 1 $passMessage pass
+    set content [::userCommon::readFile $csv]
+    set casename ""
+    regexp {.*((E|HDL|VDB_)\d{4})_pass.csv} $csv matches ennoid
+
+    foreach line [split $content "\n"] {
+        if {$line == "" || [string match {tool`Amessageid`rule} $line] == 1} {
+            continue
+        }
+        set lines [split $line "`"]
+        set firstItem [lindex $lines 0]
+        if {[file exists $firstItem] == 1 || [string match "/home/jenkins*" $firstItem] == 1} {
+            if {$flag == 0} {
+                set casename [file tail $firstItem]
+            } else {
+                set casename $firstItem
+            }
+            if {[catch [dict get $pass $casename] value] != 0} {
+                dict set pass $casename [dict create pass {}]
+            }
+            continue
+        }
+
+        if {$casename != ""} {
+            if {[catch {dict get $pass $casename "pass"} passes] == 0} {
+                lappend passes $lines
+                dict set pass $casename "pass" $passes
+            } else {
+                dict set pass $casename "pass" [list $lines]
+            }
+        }
+    }
+}
+##################################################################
+## 过程名称：compare_last_and_latest_messages
+## 过程功能：对比 new 和 old 中的信息，并继承
+## 入口参数：
+##         new: 新的 failMessage
+##          old: 旧的 failMessage
+## 出口参数：无
+## 其他说明：无
+## 使用样例：无
+##################################################################
+proc compare_last_and_latest_messages {new old} {
+    dict for {ennoid value} $new {
+        if {[dict exists $::userCommon::rulemap $ennoid] == 0} {
+            continue
+        }
+        set ::compare::ennoid $ennoid
+        dict for {case value1} $value {
+            set ::compare::filepath $case
+            dict for {type newFailMessages} $value1 {
+                if {$type == "pass"} {
+                    dict set ::compare::failMessage $ennoid $case "pass" $newFailMessages
+                    continue
+                }
+                # 将列表转成字典
+                set newFailDict [list_to_dict $newFailMessages 0 6]
+                if {[file exists $case] == 1} {
+                    set case [file tail $case]
+                }
+                # 查看是否 old 存在、并继承
+                if {[catch {dict get $old $ennoid $case $type} oldFailMessages] == 0} {
+                    set oldFailDict [list_to_dict $oldFailMessages 0 6]
+                    # 继承
+                    compare_old_new_failMessage $oldFailDict $newFailDict latest
+                    if {$latest == ""} {
+                        continue
+                    }
+                    dict set ::compare::failMessage $ennoid $case $type $latest
+                } else {
+                    # old 中不存在；即为新增加的 msg
+                    compare_old_new_failMessage {} $newFailDict latest
+                    dict set ::compare::failMessage $ennoid $case $type $latest
+                }
+            }
+        # 写 csv
+        catch {write_objectUnmatch_csv "inher"} var
+        }
+    }
+}
+##################################################################
+## 过程名称：list_to_dict
+## 过程功能：将 list 中的一部分元素变成变成字典的key和value
+## 入口参数：
+##          list1:列表
+##          first:变成 key 的开始索引值
+##          end:变成 value 的结束索引值
+## 出口参数：无
+## 其他说明：无
+## 使用样例：无
+##################################################################
+proc list_to_dict {list1 first end} {
+    set newDict [dict create]
+    foreach item $list1 {
+        set key [lrange $item $first $end]
+        set value [lreplace $item $first $end]
+        ######################################
+        # 不继承某些位置时
+        set key [lreplace $key 6 6 ""]
+        lappend value [lindex $item 6]
+        ######################################
+        # 已经存在相同的key；则将 10 到 end 的保存在列表中
+        if {[catch {dict get $newDict $key} values] == 0} {
+            lappend values $value
+            dict set newDict $key $values
+        } else {
+            dict set newDict $key [list $value]
+        }
+    }
+    return $newDict
+}  
+##################################################################
+## 过程名称：inheritance_fail_message
+## 过程功能：继承 objNotMatch 中的 total.csv
+## 入口参数：
+##          old: 上一个版本的 数据 -> 字典
+##          new: 当前版本的结果 -> 字典
+##          latestMessage: 继承之后的结果
+## 出口参数：无
+## 其他说明：无
+## 使用样例：无
+##################################################################
+proc compare_old_new_failMessage {old new latestMessage} {
+    upvar 1 $latestMessage latest
+    set latest [list]
+    # new 的 newValue 肯定为空
+    dict for {key newValue} $new {
+        if {[catch {dict get $old $key} oldValue] == 0} {
+            set i 0
+
+            foreach item $oldValue {
+                set itemnewValue [lindex $newValue $i]
+                if {[lindex $itemnewValue 3] == "1" && [lindex $itemnewValue 3] == "7"} {
+                    # 当 new 的 不为空时
+                    set item [concat $key $itemnewValue]
+                } else {
+                    # 当 new 的 为空时
+                    if {[lindex $item end-1] == "new"} {
+                        set item [lreplace $item end-1 end-1 ""]
+                    }
+                    if {$itemnewValue == ""} {
+                        # 当key相同时,old中得数量比new多,并且new为空时,说明new报少了
+                        continue
+                    }
+                    ##########################################################
+                    # 不继承某个元素
+                    set index 6
+                    set key [lreplace $key $index $index [lindex $itemnewValue end]]
+                    set itemnewValue [lrange $itemnewValue 0 end-1]
+                    set item [lrange $item 0 end-1]
+                    ##########################################################
+
+                    if {[regexp {.*\.f$} [lindex $item end-1]] == 1} {
+                        set item [lreplace $item end-1 end-1 ""]
+                    }
+                    set item [concat $key [lrange $itemnewValue 0 2] [lrange $item end-1 end]]
+                }
+                lappend latest $item
+                incr i
+            }
+            set old [dict remove $old $key]
+        } else {
+            # 说明的新的结果中新增的、或者修改了 obj 的
+            foreach item $newValue {
+                ##########################################################
+                # 不继承某个 元素
+                # set index 6
+                # set key [lreplace $key Sindex $index [lindex Sitem 1 end]]
+                # set item [lrange $item 0 end-1]
+                ##########################################################
+                set item [linsert $item end]
+                set item [concat $key $item]
+                if {[lindex $item 9] == "" || [lindex $item 9] == "new"} {
+                    # 可能存在已經被標記的
+                    set item [lreplace $item 9 9 "new"]
+                }
+                lappend latest $item
+            }
+        }
+    }
+}
+##################################################################
+## 过程名称：check_fail
+## 过程功能：查看是否读取完全
+## 入口参数：
+##          ennoids: enno id 列表
+## 出口参数：无
+## 其他说明：无
+## 使用样例：无
+##################################################################
+proc check_fail {ennoids} {
+    foreach ennoid $ennoids {
+        if {[catch {glob ./objNotMatch/${ennoid}_*.csv}] != 0} {
+            # puts $ennoid
+            # puts [dict get $::compare::failMessage $ennoid]
+        }
+    }
+}
+
 
 
 
