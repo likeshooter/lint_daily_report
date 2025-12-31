@@ -610,88 +610,55 @@ proc check_fail {ennoids} {
 
 
 
-马杰	"今日分析rule数量：
-分析message 数量：
-提交DTS数量： 
-GUI需求：
-日报：
-      具体事项（提交的DTS\以及描述）
-今日费时问题：如果有请描述、没有则写已汇报"
-夏康凯	"今日分析rule数量：
-分析message 数量：
-提交DTS数量： 
-GUI需求：
-日报：
-正在分析需要答疑的问题
-今日费时问题：已汇报"
+
+
+
+
+夏康凯	
 刘昌祥	"今日分析rule数量：
 分析message 数量：
 提交DTS数量： 2
 GUI需求：
 日报：
-    1，回传B5case 30个；
-    2，复现之前未复现的case 1个，并且发现一个新问题；
-    3，整理完两条CA提出的评审问题；
- lcx_1229_01：复制运算是负数的情况，elint都会报成1bit,A会报SYNTH_5411就不会报位宽的rule；
-今日费时问题：如果有请描述、没有则写已汇报"
+    1,解决交付的6个问题，其中2个是bug,四个是差异；
+DTS2025123029257：对象不匹配造成未分析的bug(A和elint都存在bug),for语句里面用终止情况减去循环变量的情况,""A-1""elint是1bit,A工具是33bit，实际应该是6bit；
+DTS2025123021413：参数重定向出现问题，代码走test2的时候A=29,i=A-1所以i是28，位宽应该是5bit;这个从elint报出来的msg来看就影响到三条rule(LhsGreaterThanRhs LhsLessThanRhs LhsRhsWidthNotMatch),还有就是LhsGreaterThanRhs存在一个问题“The LHS expression 'out' width '6' is greater than the RHS expression 'i' width '6' in assignment in the hierarchy 'TOP:test1@TEST'”都是六位，结果还报这条rule;
+今日费时问题：已汇报"
 张凯阳	"今日分析rule数量：
 分析message 数量：
-提交DTS数量： 1
-ky_1229_01：误报dead code的违例，A报3条，elint报4条
+提交DTS数量：2 
+DTS2025123017469：黑盒的input port没有驱动，按照elint对于黑盒端口的处理方式，只要是黑盒的端口，即认为默认load，所以这种情况应该报E0314
+DTS2025123021414：inout被多驱，其中一个驱动源是bbox里面的信号，elint漏报E0309，按照elint整体实现，bbox和grey box均作为有效的driver/loaded
 GUI需求：
 日报：
-1.整理差异，发现1个误报
-2.回归之前未复现的dts：5
-今日费时问题：如果有请描述、没有则写已汇报"
-王涵	"今日分析rule数量：
-分析message 数量：
-提交DTS数量： 
-GUI需求：
-日报：
-      具体事项（提交的DTS\以及描述）
+1.答疑ca提出的有争议的差异，分析4个rule，其中两个存在bug，已提单
 今日费时问题：如果有请描述、没有则写已汇报"
 戢玮淇	"今日分析rule数量：
 分析message 数量：
 提交DTS数量： 
 GUI需求：
 日报：
+1.整理泛化case差异E0309和E0337
+2.分析CA对FFOutputUsedAsRS的漏报答疑
       具体事项（提交的DTS\以及描述）
-今日费时问题：如果有请描述、没有则写已汇报"
-齐景烁	"今日分析rule数量：
-分析message 数量：
-提交DTS数量： 
-GUI需求：
-日报：
-      具体事项（提交的DTS\以及描述）
-今日费时问题：如果有请描述、没有则写已汇报"
-殷艺豪	"今日分析rule数量：
-分析message 数量：
-提交DTS数量： 
-GUI需求：
-日报：
-      具体事项（提交的DTS\以及描述）
-今日费时问题：如果有请描述、没有则写已汇报"
+今日费时问题：已汇报"
+齐景烁	
+殷艺豪	
 钟鑫冰	"今日分析rule数量：
 分析message 数量：
 提交DTS数量： 
 GUI需求：
 日报：
-      具体事项（提交的DTS\以及描述）
-今日费时问题：如果有请描述、没有则写已汇报"
-莫春豪	"今日分析rule数量：
-分析message 数量：
-提交DTS数量： 
-GUI需求：
-日报：
-      具体事项（提交的DTS\以及描述）
-今日费时问题：如果有请描述、没有则写已汇报"
+      1.分配答疑任务
+      2.讨论关于deverload相关的问题
+今日费时问题：已汇报"
+莫春豪	
 左万林	"今日分析rule数量：
 分析message 数量：
 提交DTS数量： 
 GUI需求：
 日报：
-1、整理E0253的差异并复现case，进度为复现50%，期间发现Diff_ca_013的脚本未判断ff/r是否是常值
-2、核对CDC泛化测试报告和ecdc msgid与sg rule对应关系表之间的rule是否对齐
-3、完成客户对HangingInstInput和InoutNotSet两个rule的答疑
+1、复现漏报E0331的case，并提zwl_1230_01/02两个单
+2、完成客户对ClockSigNotInput的答疑，并复现case
+3、完成客户对HangingInstOutput的漏报答疑，并复现case，提单漏报DTS2025123031691，误报DTS2025123031723，增量原理图问题DTS2025123031755；对于bit位不一致的答疑，复现case说明问题
 今日费时问题：已汇报"
-
