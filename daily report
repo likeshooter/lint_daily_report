@@ -613,67 +613,76 @@ proc check_fail {ennoids} {
 
 
 
-
-夏康凯	
-刘昌祥	"今日分析rule数量：
+马杰	"今日分析rule数量：
 分析message 数量：
-提交DTS数量： 2
+提交DTS数量： 
 GUI需求：
 日报：
-    1,解决交付的6个问题，其中2个是bug,四个是差异；
-DTS2025123029257：对象不匹配造成未分析的bug(A和elint都存在bug),for语句里面用终止情况减去循环变量的情况,""A-1""elint是1bit,A工具是33bit，实际应该是6bit；
-DTS2025123021413：参数重定向出现问题，代码走test2的时候A=29,i=A-1所以i是28，位宽应该是5bit;这个从elint报出来的msg来看就影响到三条rule(LhsGreaterThanRhs LhsLessThanRhs LhsRhsWidthNotMatch),还有就是LhsGreaterThanRhs存在一个问题“The LHS expression 'out' width '6' is greater than the RHS expression 'i' width '6' in assignment in the hierarchy 'TOP:test1@TEST'”都是六位，结果还报这条rule;
+      具体事项（提交的DTS\以及描述）
+今日费时问题：如果有请描述、没有则写已汇报"
+夏康凯	"今日分析rule数量：
+分析message 数量：
+提交DTS数量： 
+GUI需求：
+日报：
+分析TOP_LGC需要答疑的问题: 
+4个是已知问题,除此之外，E0319有问题待讨论: 我们报的内部pin, 但是sg报在了pin所对应的net, 因此报在了一个真实信号, 但是从RTL上也合理
+今日费时问题：已汇报"
+刘昌祥	"今日分析rule数量：
+分析message 数量：
+提交DTS数量： 
+GUI需求：
+日报：
+    整理了两个评审的问题，但是还存在部分疑问，等明天RD来确认；
 今日费时问题：已汇报"
 张凯阳	"今日分析rule数量：
 分析message 数量：
-提交DTS数量：2 
-DTS2025123017469：黑盒的input port没有驱动，按照elint对于黑盒端口的处理方式，只要是黑盒的端口，即认为默认load，所以这种情况应该报E0314
-DTS2025123021414：inout被多驱，其中一个驱动源是bbox里面的信号，elint漏报E0309，按照elint整体实现，bbox和grey box均作为有效的driver/loaded
+提交DTS数量： 
 GUI需求：
 日报：
-1.答疑ca提出的有争议的差异，分析4个rule，其中两个存在bug，已提单
+      具体事项（提交的DTS\以及描述）
 今日费时问题：如果有请描述、没有则写已汇报"
 戢玮淇	"今日分析rule数量：
 分析message 数量：
 提交DTS数量： 
 GUI需求：
 日报：
-1.整理泛化case差异E0309和E0337
-2.分析CA对FFOutputUsedAsRS的漏报答疑
       具体事项（提交的DTS\以及描述）
-今日费时问题：已汇报"
-齐景烁	
-殷艺豪	
+今日费时问题：如果有请描述、没有则写已汇报"
+齐景烁	"今日分析rule数量：
+分析message 数量：
+提交DTS数量： 
+GUI需求：
+日报：
+      具体事项（提交的DTS\以及描述）
+今日费时问题：如果有请描述、没有则写已汇报"
+殷艺豪	"今日分析rule数量：
+分析message 数量：
+提交DTS数量： 
+GUI需求：
+日报：
+      具体事项（提交的DTS\以及描述）
+今日费时问题：如果有请描述、没有则写已汇报"
 钟鑫冰	"今日分析rule数量：
 分析message 数量：
 提交DTS数量： 
 GUI需求：
 日报：
-      1.分配答疑任务
-      2.讨论关于deverload相关的问题
-今日费时问题：已汇报"
-莫春豪	
+      具体事项（提交的DTS\以及描述）
+今日费时问题：如果有请描述、没有则写已汇报"
+莫春豪	"今日分析rule数量：
+分析message 数量：
+提交DTS数量： 
+GUI需求：
+日报：
+      具体事项（提交的DTS\以及描述）
+今日费时问题：如果有请描述、没有则写已汇报"
 左万林	"今日分析rule数量：
 分析message 数量：
 提交DTS数量： 
 GUI需求：
 日报：
-1、复现漏报E0331的case，并提zwl_1230_01/02两个单
-2、完成客户对ClockSigNotInput的答疑，并复现case
-3、完成客户对HangingInstOutput的漏报答疑，并复现case，提单漏报DTS2025123031691，误报DTS2025123031723，增量原理图问题DTS2025123031755；对于bit位不一致的答疑，复现case说明问题
-今日费时问题：已汇报"
-
-
-答疑情况：
-    AO：
-        已经分析完成
-        答疑还剩3个rule
-    TOP：
-        需要答疑的场景（总21个rule：1w+msg）
-          误报：6
-          漏报：30
-          待确认：10
-           E0236:9000+msg
-              寄存器的输出当作复位使用，SG不报，ENNO报，不清楚SG为啥不报
-        分析完成：15个
-  
+1、核对CDC中的lint rule在CDC泛化测试报告、关系对应表、工具文档这三者之间的关系，报告有但不在CDC目录章节；并且存在工具文档有但报告和表格没有、工具文档有和报告有但表格没有
+2、复现误报HangingInstOutput的case
+3、参加客户答疑会议
+今日费时问题：如果有请描述、没有则写已汇报"
