@@ -612,7 +612,6 @@ proc check_fail {ennoids} {
 
 
 
-
 马杰	"今日分析rule数量：
 分析message 数量：
 提交DTS数量： 
@@ -625,35 +624,33 @@ GUI需求：
 提交DTS数量： 
 GUI需求：
 日报：
-分析TOP_LGC需要答疑的问题:
-1. E0319: 和伟豪讨论后决定暂时保持现在的行为(只报在pin上,VC SG也是报在pin上)
-2. E0315: undriven的信号被多次load时, 我们和sg的综合一致, 但是sg报的行号有问题,和柯杰分析后认为sg有bug
-
-debug driveload脚本问题, 目前发现E0314的driver的判断有问题, 正在和柯杰对齐
+1. 分析TOP_LGC三个需要答疑的问题
+2. 排查driveload脚本问题, 一些早期写的关于drive/load的场景不全面, 在排查中
 今日费时问题：已汇报"
 刘昌祥	"今日分析rule数量：
+分析message 数量：
+提交DTS数量： 1
+GUI需求：
+日报：
+      整理了5个需要评审的问题(4个差异，1bug)，确认了E0236现在elint的行为是源自内层还是外层的ff都报，回退（DTS2025112148048）只报源自内层ff的输出（bug）；复位、置位源自外层ff的输出，elint不报，A部分报了(差异)；
+    DTS2026010622153：连接的时候片选采用了generate for的循环变量，导致elint出现误报；
+今日费时问题：如果有请描述、没有则写已汇报"
+张凯阳	"今日分析rule数量：
 分析message 数量：
 提交DTS数量： 
 GUI需求：
 日报：
-    整体了4个需要评审的问题(差异)，昨天等确认的的那个问题，今天还存在争议，等待PE给一个准确的的方案（E0236为啥要穿源自ff的输出的问题）；
-今日费时问题：想要复现出E0236 A工具在什么情况下会穿源自ff的输出作为复位、置位的case；"
-张凯阳	"今日分析rule数量：
-分析message 数量：
-提交DTS数量：1
-DTS2026010528914：对于宏定义值中三目运算的表达式中的违例，elint漏报E0281 
-GUI需求：
-日报：
-1.答疑ca提出的有争议的差异，分析6条差异
+1.答疑ca提出的有争议的差异，分析3条差异
+2.回归DTS单，closed：6
+3.帮昌祥分析E0236的一条差异
 今日费时问题：如果有请描述、没有则写已汇报"
 戢玮淇	"今日分析rule数量：
 分析message 数量：
 提交DTS数量： 
 GUI需求：
 日报：
-分析7个TOP_LGC需要答疑的问题
       具体事项（提交的DTS\以及描述）
-今日费时问题：已汇报"
+今日费时问题：如果有请描述、没有则写已汇报"
 齐景烁	"今日分析rule数量：
 分析message 数量：
 提交DTS数量： 
@@ -687,25 +684,22 @@ GUI需求：
 提交DTS数量： 
 GUI需求：
 日报：
-1、新增issue zwl_0105_01（误报E0333）
-2、分析HangingInstInput答疑
-今日费时问题：在复现漏报HangingInstInput的case上花费时间最多；最后发现elint在同一层级下，会报file line靠前的位置，而sg则是报在离undriven最近的位置"
+1、DTS2026010608175（多次例化下的去重逻辑确认）
+2、DTS2026010631789（generated for语句里的参数可能出现传参错误，在例化时CPS被传参为1，但貌似elint未识别到，导致漏报port ‘sce‘’ is unconnected in instance ‘U_OIC‘的E0338；）
+3、完成TOP_LGC的HangingInstInput和PortPartConnected的答疑
+4、分析完成NFI_PHYG_TOP的HangingInstInput，主要是去重方面的疑问
+5、分析NFI_PHYG_TOP的HangingInstOutput，发现issue DTS2026010644229（E0333报的点位不对，不是output连接的net）
+
+今日费时问题：已汇报"
 
 
-答疑情况：
-AO：答疑已完成、客户评审完成
-          1．elint中没有灰盒的概念、在处理三方中的灰盒时存在问题
-          2．例化的instance在报在行号时不精确
-          3．Inout端口在交付的rule中只存在检查顶层的；需要将非顶层的inout也需要检查
-          4．同一个问题源去重问题
-TOP：（正在答疑、客户评审一部分）
-        需要答疑msg：792条
-        剩余：416条msg、12个场景
-        提单：5个漏报
-FE：正在答疑
-    需要答疑：2W+msg、16个rule、21个场景
-    已经答疑：24个msg、2个rule、2个场景
-NFI：待答疑
+
+答疑进度：
+AO：100%
+TOP：100% (待ca评审)
+FE：10%
+NFI：80%
+
 
 
 
