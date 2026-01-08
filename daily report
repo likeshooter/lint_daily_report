@@ -611,7 +611,6 @@ proc check_fail {ennoids} {
 
 
 
-
 马杰	"今日分析rule数量：
 分析message 数量：
 提交DTS数量： 
@@ -624,25 +623,24 @@ GUI需求：
 提交DTS数量： 
 GUI需求：
 日报：
-1. 分析TOP_LGC三个需要答疑的问题
-2. 排查driveload脚本问题, 一些早期写的关于drive/load的场景不全面, 在排查中
+分析FE的4个答疑问题: 
+  2个DB上的行号问题
+  1个疑似sg的bug, 从elint和sg的电路来看, 都符合E0320
+  1个综合差异, 从elint的电路来看符合E0320
 今日费时问题：已汇报"
 刘昌祥	"今日分析rule数量：
 分析message 数量：
-提交DTS数量： 1
+提交DTS数量： 
 GUI需求：
 日报：
-      整理了5个需要评审的问题(4个差异，1bug)，确认了E0236现在elint的行为是源自内层还是外层的ff都报，回退（DTS2025112148048）只报源自内层ff的输出（bug）；复位、置位源自外层ff的输出，elint不报，A部分报了(差异)；
-    DTS2026010622153：连接的时候片选采用了generate for的循环变量，导致elint出现误报；
-今日费时问题：如果有请描述、没有则写已汇报"
+       整理了3个需要评审的问题(差异)
+今日费时问题：已汇报"
 张凯阳	"今日分析rule数量：
 分析message 数量：
 提交DTS数量： 
 GUI需求：
 日报：
-1.答疑ca提出的有争议的差异，分析3条差异
-2.回归DTS单，closed：6
-3.帮昌祥分析E0236的一条差异
+1.答疑ca提出的有争议的差异，分析8条差异，5条确认为差异，3条行号差异待PE RD研究后确认结论
 今日费时问题：如果有请描述、没有则写已汇报"
 戢玮淇	"今日分析rule数量：
 分析message 数量：
@@ -684,25 +682,22 @@ GUI需求：
 提交DTS数量： 
 GUI需求：
 日报：
-1、DTS2026010608175（多次例化下的去重逻辑确认）
-2、DTS2026010631789（generated for语句里的参数可能出现传参错误，在例化时CPS被传参为1，但貌似elint未识别到，导致漏报port ‘sce‘’ is unconnected in instance ‘U_OIC‘的E0338；）
-3、完成TOP_LGC的HangingInstInput和PortPartConnected的答疑
-4、分析完成NFI_PHYG_TOP的HangingInstInput，主要是去重方面的疑问
-5、分析NFI_PHYG_TOP的HangingInstOutput，发现issue DTS2026010644229（E0333报的点位不对，不是output连接的net）
+1、分析NFI_PHYG_TOP的HangingInstOutput，因去重逻辑不一致发DTS2026010727953（E0333不同的例化层次去重导致bit不一致）
+2、分析FE_TSS的HangingInstOutput的误报，初步分析结果疑似sg bug，需要复现case验证
+今日费时问题：如果有请描述、没有则写已汇报"
 
-今日费时问题：已汇报"
 
 
 
 答疑进度：
 AO：100%
 TOP：100% (待ca评审)
-FE：10%
-NFI：80%
+FE：40%
+NFI：100%
 
-DTS：19个单
-漏报：10个
-误报：6个
+DTS：21个单
+漏报：11个
+误报：7个
 其他：3个
 
 
