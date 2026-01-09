@@ -610,7 +610,6 @@ proc check_fail {ennoids} {
 
 
 
-
 马杰	"今日分析rule数量：
 分析message 数量：
 提交DTS数量： 
@@ -623,24 +622,28 @@ GUI需求：
 提交DTS数量： 
 GUI需求：
 日报：
-分析FE的4个答疑问题: 
-  2个DB上的行号问题
-  1个疑似sg的bug, 从elint和sg的电路来看, 都符合E0320
-  1个综合差异, 从elint的电路来看符合E0320
-今日费时问题：已汇报"
+分析FE的答疑问题: 实际为sg的infer_enabled_flop 会导致E0320的结果变化
+回传drive脚本
+今日费时问题：如果有请描述、没有则写已汇报"
 刘昌祥	"今日分析rule数量：
 分析message 数量：
-提交DTS数量： 
+提交DTS数量：2
 GUI需求：
 日报：
-       整理了3个需要评审的问题(差异)
-今日费时问题：已汇报"
+
+      整理了10个需要评审的问题(5差异，5bug)
+DTS2026010825093:generate for的循环变量用作操作数，以及i多维数组的索引，elint会计算错误;
+DTS2026010825093:等号右边的复杂表达式（含有移位），elint位宽计算错误
+今日费时问题：如果有请描述、没有则写已汇报"
 张凯阳	"今日分析rule数量：
 分析message 数量：
-提交DTS数量： 
+提交DTS数量：3 
+DTS2026010825702：elint对于parameter声明时时候其它parameter当做位宽index的表达式的位宽解析有问题导致误报
+DTS2026010830697：always for循环内部的循环变量，其位宽应受参数NUM的控制，在NUM参数被重定向为196（8bit）后，elint仍然报5bit，导致误报E0292
+DTS2026010831375：对于memory类型FF的报错以及实例在不同行内的信号的违例，elint行号报的不准确
 GUI需求：
 日报：
-1.答疑ca提出的有争议的差异，分析8条差异，5条确认为差异，3条行号差异待PE RD研究后确认结论
+答疑ca提出的有争议的差异，分析5条差异，提3个DTS单
 今日费时问题：如果有请描述、没有则写已汇报"
 戢玮淇	"今日分析rule数量：
 分析message 数量：
@@ -682,23 +685,15 @@ GUI需求：
 提交DTS数量： 
 GUI需求：
 日报：
-1、分析NFI_PHYG_TOP的HangingInstOutput，因去重逻辑不一致发DTS2026010727953（E0333不同的例化层次去重导致bit不一致）
-2、分析FE_TSS的HangingInstOutput的误报，初步分析结果疑似sg bug，需要复现case验证
-今日费时问题：如果有请描述、没有则写已汇报"
+1、分析完FE_TSS的HangingInstOutput，发现是sg的bug，hanging的output没有报
+2、分析FE_TSS的LhsGreaterThanRh，发现DTS2026010829343(误报LhsGreaterThanRhs，左移右移改变了位宽)、DTS2026010830218（高位拼接为0 ，是否计算位宽，如果算则是误报，不算则是差异）
+今日费时问题：已汇报"
 
 
-
-
-答疑进度：
-AO：100%
-TOP：100% (待ca评审)
-FE：40%
-NFI：100%
-
-DTS：21个单
-漏报：11个
-误报：7个
-其他：3个
+DTS：28个单
+漏报：12个
+误报：14个
+其他：2个
 
 
 
