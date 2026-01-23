@@ -1,6 +1,11 @@
+# E0319
+dict set ::compare::BMessage OutputPinUnloaded {{The output pin '%' is unloaded}}
+dict set ::compare::AMessage UnloadedOutTerm-ML {{Detected unloaded\unconnected\ output terminal % of Grey Box} {Detected unloaded\(unconnected\) output terminal % \(Left Open\)} {Detected unloaded\(unconnected\) output terminal % \(Connected to floating.*}}
 
 
+# e0280中的dose修改成does
 
+E0322 \(%\)
 
 
 
@@ -128,74 +133,9 @@
 
 
 
-#########################################################################
-## 
-## 添加时间：
-## prco的作用： 将相对路径变成绝对路径,在处理 process_design_dir 中使用
-## 作用工具： lint/3rd
-## 需要处理的enoID:
-## issue:
-## 返回值：list
-## 以前proc名字:
-##
-#########################################################################
-proc absolutePath {object} { ; # 估计会存在问题
-    if {[regexp {^\/.*} $object] == 1 && [file exists $object] == 1} {
 
-        return $object
-    }
-    set casename [file tail ${::compare::filepath}]
 
-    foreach casepath ${::compare::filelist} {
 
-        set design [::userCommon::getAllFiles [file join $casepath $casename] -name "[file tail $object]"]
-        if {$design == ""} {
-            continue
-        } else {
-            return $design
-        }
-        # if {[file exists [file join $casepath $casename]] == 1} {
-        #     if {[string match {/**} $object] == 1} {
-        #         return [file join $casepath $casename [string map {"/" ""} $object]]
-        #     } elseif {[regexp {^\/.*} $object] == 1} {
-        #         set names [split $object "/"]
-        #         set path [file join $casepath $casename]
-        #         foreach name $names {
-        #             if {[file exists [file join $path $name]] == 1} {
-        #                 set path [file join $path $name]
-        #             }
-        #         }
-        #         return $path
-        #     } else {
-        #         return [file join $casepath $casename $object]
-        #     }
-        # } else {
-        #     continue
-        # }
-    }
-    return $object
-    # return [file tail $object]
-}
-#########################################################################
-##
-## 添加时间:0624
-## prco的作用： 对obj进行排序
-## 作用工具：lint/3rd
-## 需要处理的enoID: E0029
-## issue:
-## 返回值：list
-## 以前proc名字
-## 
-#########################################################################
-proc lsortObject {object} {
-    if {$::compare::ennoid == "E0267"} {
-        # 12 互换 34 互换
-        set newObject [::userDictOrList::adjustListOrder $object {1 2} {3 4}]
-    } else {
-        set newObject [lsort $object]
-    }
-    return $newObject
-}
 
 
 
@@ -803,413 +743,904 @@ proc lsortObject {object} {
 
 
 
-#########################################################################
-##
-## 添加时间：20250819
-## proc的作用：去找第一个obj的 heri
-## 作用工具：lint
-## 需要处理的enoID/case編號： E0336/E0237/E0250
-## 編寫人：xbzhong
-## 文件編號：
-## 
-#########################################################################
-proc delete_heri {object} {
-    set newObjects [list]
-    set obj [lindex $object 0]
-    if {[regexp {.*(genblk[0-9]*.*)} $obj match newobj] == 1} {
-        set newObjects [lreplace $object 0 0 $newobj]
-        puts $newObjects
-    } else {
-        if {$::compare::ennoid == "E0331"} {
-            set objs [split $obj "/"]
-            set newObjects [lreplace $object 0 0 [lindex $objs end]]
-        } else {
-            set objs [split $obj "/."]
-            set newObjects [lreplace $object 0 0 [lindex $objs end]]
-        }
-    }
-    return $newObjects
-}
 
-# 输入enno已经匹配的msg的索引，以及enno-msg的个数，获取没有匹配的msg
-proc get_extra_index {match_list length} {
-    set all_index [list]
-    for {set index 0} {$index < $length} {incr index} {
-        lappend all_index $index
-    }
-    set match_list [lsort $match_list]
 
-    set result {}
-    foreach elem $all_index {
-        if {$elem ni $match_list} {
-            lappend result $elem
-        }
-    }
-    return ${result}
-}
 
-# 将sg的obj转换为enno的格式
-# proc reformat_s_names_setup {sd_key} {
-#     set dot {\.}
-#     set top [get_top]$dot
-#     set sd_key [regsub -all {\\} $sd_key {#}]
-#     set sd_key [regsub -all { \.} $sd_key {=}]
-#     for {set i 0} {$i<[llength $sd_key]} {incr i} {
-#         set item [lindex $sd_key $i]
-#         set item [regsub -all {=} $item { .}]
-#         set item [regsub -all {#} $item {\\}]
-#         if {[get_param db.use_hier_name_include_top] == "false"} {
-#             regsub $top $item {} item
-#             regsub -all ",$top" $item {,} item
-#             regsub -all "\{$top" $item "\{" item
-#             regsub -all "\{[get_top]/" $item "\{" item
-#             regsub -all " $top" $item { } item
-#         }
-#         if {[string first "\\" ${item}] != -1} {
-#             set items ""
-#             set blackslash_num [llength [regexp -all -inline {\\} $item]]
-#             for {set j 0} {$j < [expr $blackslash_num]} {incr j} {
-#                 set first_balckslash_char [string first "\\" $item]
-#                 set first_space_char [string first " " [string range $item [expr $first_balckslash_char] end]]
-#                 set unchanged_first_char [string range $item [expr $first_balckslash_char +1] [expr $first_space_char + $first_balckslash_char]]
-#                 set changed_first_char [string range $item 0 [expr $first_balckslash_char]]
-#                 set item [string range $item [expr $first_balckslash_char + $first_space_char + 1] end]
-#                 append items [string cat [string map {"." "/" "\\" ""} $changed_first_char] [string map {" " ""} $unchanged_first_char]]
-#                 if {$j == [expr $blackslash_num - 1]} {
-#                     append items [string map {"." "/"} $item]
-#                 }
-#             }
-#             set item $items
-#         } else {
-#             set item [string map {"." "/"} $item]
-#         }
-#         if {[regexp {\.} $item]} {
-#             if {![regexp {\[} $item]} {
-#                 set item [lindex $item 0]
-#             }
-#         }
-#         #add for rst[1, 2]
-#         if {[regexp {\[(.*?)\]} $item match content] && [string first "," $content] >= 0} {
-#             regexp {(.*?)((\[.*])+)} $item -> varname
-#             set content [regsub { } $content {}]
-#             set indexs [split $content ","]
-#             set item {}
-#             foreach index $indexs {
-#                 lappend item "${varname}\[${index}\]"
-#             }
-#         }
-#         if {[string match "*,*" $item]} {
-#             set pattern {^.*\[[^]]*,.*\]}
-#             if {![regexp $pattern $item]} {
-#                 set item [lindex $item 0]
-#                 set item_list [split $item ","]
-#                 set item {}
-#                 foreach element $item_list {
-#                     regsub $top $element {} element
-#                     lappend item $element
-#                 }
-#             }
-#         }
-#         # if {[get_param db.use_hier_name_include_top] == "true"} {
-#         #     regsub "[get_top]/" $item "[get_top]." item
-#         #     regsub -all "\{[get_top]/" $item "\{[get_top]." item
-#         #     regsub -all " [get_top]/" $item " [get_top]." item
-#         # }
 
-#         if {[regexp {\[} $item]} {
-#             set matches [regexp -inline -all {\[(\w+)\]} $item]
-#             foreach {match1 match2} $matches {
-#                 if {[string is digit $match2]} {
-#                     continue
-#                 } else {
-#                     set item [string map [list $match1 .$match2] $item]
-#                 }
-#             }
-#         }
-#         lset sd_key $i $item
-#     }
-#     return [subst $sd_key]
-# }
 
-#########################################################################
-##
-### 添加时间：20251119
-### proc的作用：将s的obj转换为e的obj增强版
-### 作用工具：lint/ag
-### 需要处理的diff编号：Diff_ca_026
-### 编写人：chenhaiyang
-### 文件编号：
-#########################################################################
-proc ::__is_obj {obj} {
-    if {[get_instances $obj] != ""} {
-        return 1
-    }
-    if {[get_nets $obj] != ""} {
-        return 1
-    }
-    if {[get_ports $obj] != ""} {
-        return 1
-    }
-    if {[get_pins $obj] != ""} {
-        return 1
-    }
-    return 0
-}
-proc ::__s_to_e_obj {obj} {
-    if {[llength $obj] == 1} {
-        set obj {*}$obj
-    }
-    set tmp_obj [string map {" .\\" {`!} ".\\" {`!} " ." ` " " ""} $obj]
-    set have_top [string match "[get_top].*" $tmp_obj]
-    if {$have_top} {
-        set tmp_obj [string range $tmp_obj [string length [get_top]]+1 end]
-    }
-    # if {[string match {*\*.*\}} $obj]} {
-    #     lassign [split [string map {} [ } $tmp_obj] `}] BN S _
-    #     set result [concat {*}[lmap i [concat {*}[split $S ,]] {::__s_to_e_obj [format "$BN\\[%s\\]" $i]}]]
-    #     return $result
-    # }
-    set str_list ""
-    foreach i [split $tmp_obj "`"] {
-        if {[string first {!} $i] == 0} {
-            set l_i [string range $i 1 end]
-        } else {
-            set l_i [split $i .]
-        }
-        foreach j $l_i {
-            if {[string match {*\[[a-zA-Z_]*} $j]} {
-                set j [regsub -all {\[([a-zA-Z_]\w*)\]} $j {.\1}]
-            }
-            lappend str_list $j
-        }
-    }
-    if {[get_param db.use_hier_name_include_top] == "true"} {
-        set result [get_top]
-    } else {
-        set result ""
-    }
-    set idx 0
-    while {1} {
-        set sub_str_i [lindex $str_list $idx]
-        if {$sub_str_i == ""} {break}
-        incr idx
-        set tmp [join [concat $result $sub_str_i] /]
-        if {[::__is_obj $tmp]} {
-            set result $tmp
-            continue
-        }
-        set di {CLR r PRE s EN s D d Q q CP clk}
-        if {[dict exists $di $sub_str_i]} {
-            set tmp [join [concat $result [dict get $di $sub_str_i]] /]
-            if {[::__is_obj $tmp]} {
-                set result $tmp
-                continue
-            }
-        }
-        if {[string match {rtlc_I*} $sub_str_i]} {
-            set tmp [join [concat $result [string map {rtlc_I i} $sub_str_i]] /]
-            if {[::__is_obj $tmp]} {
-                set result $tmp
-                continue
-            }
-        }
-        if {[string match {*_reg} $sub_str_i]} {
-            set tmp [join [concat $result [string range $sub_str_i 0 end-4]] /]
-            if {[::__is_obj $tmp]} {
-                set result $tmp
-                continue
-            }
-        }
-        if {[string match {*_reg\[[0-9]*} $sub_str_i]} {
-            set tmp [join [concat $result [string map {_reg[ [} $sub_str_i]] /]
-            if {[::__is_obj $tmp]} {
-                set result $tmp
-                continue
-            }
-        }
-        return $obj
-    }
-    set result [concat {*}$result]
-    return $result
-}
 
-proc get_canonical_obj {obj_list} {
-    set enno_id $::compare::ennoid
-    if {${enno_id} == "E0233"} {
-        set clock [lindex ${obj_list} 0]
-        if {[regexp {\[[0-9]+:[0-9]+\]} $clock]} {
-            return ${obj_list}
-        }
-        set clock [get_nets ${clock} -canonical]
-        set obj_list [concat ${clock} [lindex ${obj_list} 1]]
-        return ${obj_list}
-    }
-}
-set ::wwww1 0
-proc fix_E0239_s_obj {obj_list} {
-    lappend ::compare::DIFF "Diff_ca_010"
-    set obj_0 [reformat_s_names_setup [lindex $obj_list 0]]
-    # set obj_1 [__s_to_e_obj [lindex $obj_list 1]]
-    # set obj_2 [__s_to_e_obj [lindex $obj_list 2]]
 
-    set obj_0 [get_nets -canonical $obj_0]
-    # set tmp_1 [get_nets -canonical [get_pins [get_instances $obj_1] -filter {@name == "r"}]]
-    # if {$tmp_1 != ""} {
-    #     set tmp_1 [lindex [get_instances [get_fanin -to $tmp_1 -startpoints_only -tcl_list] -filter {@view == "VERIFIC_DFFRS"}] end]
-    # }
-    # if {$tmp_1 != ""} {
-    #     set obj_1 $tmp_1
-    # }
-    # set tmp_2 [get_nets -canonical [get_pins $obj_2]]
-    # if {$tmp_2 != ""} {
-    #     set tmp_2 [lindex [get_instances [get_fanin -to $tmp_2 -startpoints_only -tcl_list] -filter {@view == "VERIFIC_DFFRS"}] end]
-    # }
-    # if {$tmp_2 != ""} {
-    #     set obj_2 $tmp_2
-    # }
-    lset obj_list 0 [string map {/ .} $obj_0]
-    # lset obj_list 1 [string map {/ .} $obj_1]
-    # lset obj_list 2 [string map {/ .} $obj_2]
-    lset obj_list 1 "no_comp"
-    lset obj_list 2 "no_comp"
-    # if {[[incr ::wwww1] < 50} {
-    #     red $obj_list
-    # }
-    return $obj_list
-}
-set ::wwww2 0
-proc fix_E0239_e_obj {obj_list} {
-    lappend ::compare::DIFF "Diff_ca_010"
-    set obj_0 [lindex $obj_list 0]
-    # set obj_1 [lindex $obj_list 1]
-    # set obj_2 [lindex $obj_list 2]
 
-    set obj_0 [get_nets -canonical $obj_0]
-    # set tmp_1 [get_nets -canonical [get_pins [get_instances $obj_1] -filter {@name == "r"}]]
-    # if {$tmp_1 != ""} {
-    #         set tmp_1 [lindex [get_instances [get_fanin -to $tmp_1 -startpoints_only -tcl_list] -filter {@view == "VERIFIC_DFFRS"}] end]
-    # }
-    # if {$tmp_1 != ""} {
-    #     set obj_1 $tmp_1
-    # }
-    # set tmp_2 [get_nets -canonical [get_pins $obj_2]]
-    # if {$tmp_2 != ""} {
-    #     set tmp_2 [lindex [get_instances [get_fanin -to $tmp_2 -startpoints_only -tcl_list] -filter {@view == "VERIFIC_DFFRS"}] end]
-    # }
-    # if {$tmp_2 != ""} {
-    #     set obj_2 $tmp_2
-    # }
 
-    lset obj_list 0 $obj_0
-    # lset obj_list 1 $obj_1
-    # lset obj_list 2 $obj_2
-    lset obj_list 1 "no_comp"
-    lset obj_list 2 "no_comp"
-    # if {[incr ::wwww2] < 50} {
-    #     green $obj_list
-    # }
-    return $obj_list
-}
 
-proc fix_E0125_s_obj {obj_list} {
-    lappend ::compare::DIFF "Diff_ca_028"
-    set obj_0 [lindex $obj_list 0]
-    set obj_list $obj_0
-    return $obj_list
-}
-proc fix_E0125_e_obj {obj_list} {
-    lappend ::compare::DIFF "Diff_ca_028"
-    set obj_0 [lindex $obj_list 0]
-    set obj_0 [concat {*}[get_nets -canonical $obj_0]]
-    set obj_0 [lindex [split $obj_0 /] end]
-    set obj_list $obj_0
-    return $obj_list
-}
-proc delete_heri_E0250 {obj_list} {
-    lset obj_list 0 [lindex [split [lindex $obj_list 0] /] end]
-    return $obj_list
-}
 
 
-proc fix_E0243_e_obj {obj_list} {
-    lappend ::compare::DIFF "Diff_ca_030"
-    global report_dict_E0243
-    set ff1 [lindex $obj_list 0]
-    set ff2 [lindex $obj_list 2]
-    set type [lindex $obj_list 1]
-    dict set report_dict_E0243 $ff1 1
-    if {$type == "asynchronous"} {
-        if {[get_attributes [get_nets [get_pins [get_instances $ff2] -filter {@name=="r"}]] -attribute inferred_constant] != "0"} {
-            set ff2 [lindex [get_fanin -to [get_nets [get_pins [get_instances $ff2] -filter {@name=="r"}]] -leaf -buf_inv_only -tcl_list] end]
-        } elseif {[get_attributes [get_nets [get_pins [get_instances $ff2] -filter {@name=="s"}]] -attribute inferred_constant] != "0"} {
-            set ff2 [lindex [get_fanin -to [get_nets [get_pins [get_instances $ff2] -filter {@name=="s"}]] -leaf -buf_inv_only -tcl_list] end]
-        }
-        set tmp_obj_list [concat $ff1 $type $ff2]
-    } else {
-        if {[is_sync_ff $ff2]} {
-            set ff_d_net [get_nets [get_pins [get_instances $instance_2] -filter {@name == "d"}]]
-            if {$ff_d_net != ""} {
-                set like_mux [lindex [get_fanin -to $ff_d_net -leaf -buf_inv_only -tcl_list] end]
-                set type [get_attributes $like_mux -attribute view]
-                set mux_sel_net [get_nets [get_pins $like_mux -filter {@name == "c"}]]
-                set ff2 [lindex [get_fanin -to $mux_sel_net -leaf -buf_inv_only -tcl_list] end]
-            }
-        }
-        set ff1_net [get_nets $ff1]
-        if {$ff1_net != ""} {
-            set ff1 [get_fanin -to $ff1_net -leaf -buf_inv_only -tcl_list]
-        }
-        set tmp_obj_list [concat {*}$ff1 $type $ff2]
 
 
-    }
-    return $tmp_obj_list
-}
 
-proc fix_E0243_s_obj {obj_list} {
-    lappend ::compare::DIFF "Diff_ca_030"
-    set tmp_obj_list ""
-    set ff1 [reformat_s_names_setup [lindex $obj_list 0]]
-    set ff2 [reformat_s_names_setup [lindex $obj_list 2]]
-    set type [lindex $obj_list 1]
-    if {$type == "asynchronous"} {
-        set ff2_net [get_nets $ff2]
-        if {$ff2_net != ""} {
-            set tmp_ff [get_fanin -to $ff2_net -leaf -buf_inv_only -tcl_list]
-            if {[get_attributes $tmp_ff -attributes view] == "VERIFIC_DFFRS"} {
-                if {[get_attributes [get_nets [get_pins [get_instances $tmp_ff] -filter {@name=="r"}]] -attribute inferred_constant] != "0"} {
-                    set ff2 [lindex [get_fanin -to [get_nets [get_pins [get_instances $tmp_ff] -filter {@name=="r"}]] -leaf -buf_inv_only -tcl_list] end]
-                } elseif {[get_attributes [get_nets [get_pins [get_instances $tmp_ff] -filter {@name=="s"}]] -attribute inferred_constant] != "0"} {
-                    set ff2 [lindex [get_fanin -to [get_nets [get_pins [get_instances $tmp_ff] -filter {@name=="s"}]] -leaf -buf_inv_only -tcl_list] end]
-                }
-            }
-        }
-        set ff1_net [get_nets $ff1]
-        if {$ff1_net != ""} {
-            set ff1 [get_fanin -to $ff1_net -leaf -buf_inv_only -tcl_list]
-        }
-        set tmp_obj_list [concat {*}$ff1 $type $ff2]
-    } else {
-        if {[is_sync_ff $ff2]} {
-            set ff_d_net [get_nets [get_pins [get_instances $instance_2] -filter {@name == "d"}]]
-            if {$ff_d_net != ""} {
-                set like_mux [lindex [get_fanin -to $ff_d_net -leaf -buf_inv_only -tcl_list] end]
-                set type [get_attributes $like_mux -attribute view]
-                set mux_sel_net [get_nets [get_pins $like_mux -filter {@name == "c"}]]
-                set ff2 [lindex [get_fanin -to $mux_sel_net -leaf -buf_inv_only -tcl_list] end]
-            }
-        }
-        set ff1_net [get_nets $ff1]
-        if {$ff1_net != ""} {
-            set ff1 [get_fanin -to $ff1_net -leaf -buf_inv_only -tcl_list]
-        }
-        set tmp_obj_list [concat {*}$ff1 $type $ff2]
 
-    }
-    return $tmp_obj_list
-}
 
-proc fix_E0333_e_obj {obj_list} {
-    lset obj_list 0 [lindex [split [lindex $obj_list 0] /] end]
-    return $obj_list
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+dict set ::compare::AMessage STX_VE_481 {{Syntax error near \(\"%\"\)}}
+dict set ::compare::AMessage SYNTH_5411 {{Zero or negative repetition multiplier found in concatenation expression}}
+dict set ::compare::AMessage STX_VE_478 {{Invalid vector reference to scalar \( % \)}}
+dict set ::compare::AMessage SYNTH_5263 {{% -> Fork and Join constructs are not synthesizable}}
+dict set ::compare::AMessage STX_VE_361 {{A procedural assignment statement cannot drive a net other than reg type.} {Procedural assignment statement cannot drive a net : %}}
+dict set ::compare::AMessage STX_VE_610 {{Specified expression is illegally used in the mentioned context}}
+dict set ::compare::AMessage NoConstWithXZ {{Constant containing x or z used}}
+dict set ::compare::AMessage STX_VE_378 {{Mismatch in number of items in an assignment pattern and its target}}
+dict set ::compare::AMessage STX_VE_358 {{Incorrect number of arguments passed to System Function \( \$% \)}}
+dict set ::compare::AMessage SYNTH_78 {{'%' construct is not synthesizable}}
+dict set ::compare::AMessage STX_VE_405 {{The parameter/localparam \( % \) declaration without a default value is illegal except within a parameter port list}}
+dict set ::compare::AMessage SYNTH_5288 {{Usage of 'event' is not synthesizable}}
+dict set ::compare::AMessage STX_VE_533 {{Used macro \( % \) has not been defined}}
+dict set ::compare::AMessage STX_VE_480 {{Port list must not contain both ordered and named association simultaneously}}
+dict set ::compare::AMessage STX_VE_507 {{Incorrect nettype specified in `default_nettype directive}}
+dict set ::compare::AMessage STX_VE_627 {{Call to function/task \(sequence/property\) must be done with the proper number of arguments as per the function/task \(sequence/property\) definition}}
+dict set ::compare::AMessage WRN_40 {{Net name \( % \) previously declared in file \(.*\) at line \(.*\)}}
+dict set ::compare::AMessage STX_VE_605 {{Illegal use of identifier \( % \)}}
+dict set ::compare::AMessage / {{/}}
+dict set ::compare::AMessage STX_VE_809 {{Hierarchical reference is not allowed in a constant expression}}
+dict set ::compare::AMessage WRN_44 {{Non-blocking assignment statements in function might not be supported by some simulators}}
+dict set ::compare::AMessage STX_VE_351 {{Specified function cannot enable a task.}}
+dict set ::compare::AMessage STX_VE_355 {{A function cannot include delay \(#\) or event control \(@, wait\) statements.}}
+dict set ::compare::AMessage WRN_1459 {{Assignment to an enum variable must be of the same enum type in port connection and function arguments}}
+dict set ::compare::AMessage SYNTH_165 {{In the implicit style sequential state machine, only one edge controlled event expression is allowed.}}
+dict set ::compare::AMessage STX_VE_350 {{Component name \( % \)} not a task or block}
+dict set ::compare::AMessage STX_VE_279 {{Illegal array assignment, Mismatch in element size}}
+dict set ::compare::AMessage WRN_26 {{The macro has been redefined with a different value. If this is not really intended, it may produce unexpected synthesis results.}}
+dict set ::compare::AMessage STX_VE_1384 {{Call to function \( % \) defined in file \( .* \) at line \(.*\) with invalid named argument \( % \)}}
+dict set ::compare::AMessage / {{/}}
+dict set ::compare::AMessage / {{/}}
+dict set ::compare::AMessage STX_VE_294 {{In a case statement, specifying multiple default items is not allowed}}
+dict set ::compare::AMessage WRN_1456 {{UDP \( % \) could not be translated to its synthesizable model}}
+dict set ::compare::AMessage / {{/}}
+dict set ::compare::AMessage STX_VE_608 {{\( % \) is not a valid identifier}}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+dict set ::compare::AMessage STX_VE_767 {{Sequential UDP must have output declared as REG. But port \( % \) is not declared as REG}}
+dict set ::compare::AMessage STX_VE_727 {{Only one output terminal is allowed in a UDP definition.}}
+dict set ::compare::AMessage STX_VE_297 {{A UDP instance can have only two delay specifications.}}
+dict set ::compare::AMessage STX_VE_1241 {{Virtual interface used as port not allowed.}}
+dict set ::compare::AMessage STX_VE_1226 {{Variable/net specified in modport port list not declared inside interface.}}
+dict set ::compare::AMessage STX_VE_1242 {{Virtual interface used as Interface/union items not allowed.}}
+dict set ::compare::AMessage STX_VE_484 {{Parameter list contains both ordered and named association}}
+dict set ::compare::AMessage / {{/}}
+dict set ::compare::AMessage STX_VE_1182 {{Genvar is expected as identifier}}
+dict set ::compare::AMessage ELAB_6312 {{Unsupported SV constructs found during Elaboration}}
+dict set ::compare::AMessage / {{/}}
+dict set ::compare::AMessage STX_VE_340 {{Only 4-state data type can be used to declare a net}}
+dict set ::compare::AMessage STX_VE_1216 {{Implicit port connection \(.*\) can appear at most once in the port list}}
+dict set ::compare::AMessage STX_VE_1224 {{A variable data type \( % \) is not permitted on either side of inout port}}
+dict set ::compare::AMessage / {{/}}
+dict set ::compare::AMessage STX_VE_629 {{Calls to task/function must be made with the proper number of arguments.}}
+dict set ::compare::AMessage STX_VE_711 {{Only reg type net declarations are allowed inside task/function declaration.}}
+dict set ::compare::AMessage STX_VE_459 {{Undefined forward typedef. The typedef \( % \) is not defined in the scope where it is declared}}
+dict set ::compare::AMessage STX_VE_450 {{Unpacked member \( % \) found in packed structure \(.*\) {Unpacked member \( % \) found in packed union \(.*\)}}}
+dict set ::compare::AMessage STX_VE_451 {{Packed union members should have the same size.}}
+dict set ::compare::AMessage / {{/}}
+dict set ::compare::AMessage W397 {{Value assignments to input ports}}
+dict set ::compare::AMessage SYNTH_131 {{EVENT not synthesizable,so \"\"event\"\" cannot be triggered}}
+dict set ::compare::AMessage W326 {{Event variables used with edges}}
+dict set ::compare::AMessage SYNTH_132 {{Hierarchical references \(%\) are not supported for synthesis}}
+dict set ::compare::AMessage SYNTH_5254 {{real' declarations inside SystemVerilog constructs are not supported by synthesis}}
+dict set ::compare::AMessage SYNTH_92 {{Some synthesis tools might not support specify block}}
+dict set ::compare::AMessage SYNTH_103 {{RELEASE statements are not synthesizable}}
+dict set ::compare::AMessage SYNTH_106 {{WAIT statements are not synthesizable}}
+dict set ::compare::AMessage W66 {{Ensure that a repeat construct has a static control expression}}
+dict set ::compare::AMessage W257 {{Synthesis tools ignore delays}}
+dict set ::compare::AMessage SYNTH_12613 {{fork and join constructs are not synthesizable. Ignoring them for synthesis.}}
+dict set ::compare::AMessage W430 {{The "initial" statement is not synthesizable}}
+dict set ::compare::AMessage SYNTH_126 {{Procedural continuous assign statements are not synthesizable}}
+# dict set ::compare::AMessage WRN_1021 {{Array index \(\"%\"\) out-of-bounds,index value \(\"\"\) is out of permissible range \(%\)}}
+dict set ::compare::AMessage STX_VE_689 {{Multiple connections to port \( % \) in instance \( .*\)}}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+dict set ::compare::BMessage SynthesisIgnored {{% block is ignored for synthesis}}
+
+
+
+
+
+
+dict set ::compare::BMessage PrevDeclNoRange {{'%' was previously declared without a range}}
+
+
+
+
+
+
+
+
+dict set ::compare::BMessage NotTaskOrBlock {{'%' is not a task or block}}
+
+
+dict set ::compare::BMessage FuncMissingArg {{'%' has no port called '%'}}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+dict set ::compare::BMessage DelayFormUnsupported {{three delay form with this gate is not supported}}
+dict set ::compare::BMessage ModuleInstInInterfaceDisallowed {{module instantiation of '%' is not allowed in interface '.*'}}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+dict set ::compare::BMessage NetDataTypesState {{net data types must be 4 state}}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+dict set ::compare::BMessage AssignNotSynth {{assign statement is not supported for synthesis}}
+
+
+
+
+
