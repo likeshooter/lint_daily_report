@@ -1,3 +1,8 @@
+setup 中HDL_1137少了\
+diff.tcl多了空格在52行
+
+386行：extraMEssageInfo.tcl :set message [string map {"`" ""} $message]
+
 # E0319
 dict set ::compare::BMessage OutputPinUnloaded {{The output pin '%' is unloaded}}
 dict set ::compare::AMessage UnloadedOutTerm-ML {{Detected unloaded\unconnected\ output terminal % of Grey Box} {Detected unloaded\(unconnected\) output terminal % \(Left Open\)} {Detected unloaded\(unconnected\) output terminal % \(Connected to floating.*}}
