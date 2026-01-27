@@ -1,1 +1,5 @@
-[regexp {.*\.rpt\s+[0-9]+} $line]
+usernamespace.tcl
+proc realpath 返回值是0，不是空
+123 行 lrangle 修改成 lrange
+
+
